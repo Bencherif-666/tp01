@@ -72,7 +72,9 @@ if (!$erreurs && $etudiant && $module && $noteVal !== null) {
         ]);
         $noteExistante = $stmtCheck->fetch() ?: null;
 
-        if ($action === 'modifier') {
+        $veutModifier = ($action === 'modifier') || (!empty($noteId) && $noteExistante && (int)$noteExistante['id'] === (int)$noteId);
+
+        if ($veutModifier) {
             // Modification de la note
             if (!$noteExistante) {
                 $erreurs[] = "Aucune note existante n'a été trouvée pour cet étudiant dans le module « " . $module['designation'] . " ». Utilisez le bouton « Enregistrer » pour créer une nouvelle note.";

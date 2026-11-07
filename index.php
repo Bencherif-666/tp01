@@ -27,21 +27,33 @@ require __DIR__ . '/includes/header.php';
     </div>
 
     <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
-        <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">Voyage</h3>
-        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des voyages étudiants (méthodes de voyage : Train, Car, Flight, accompagnement, description et recherche par ID).</p>
-        <a href="voyage/voyage.php">Accéder au formulaire</a> | <a href="voyage/liste.php">Liste</a>
-    </div>
-
-    <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
         <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">Bulletin de Notes</h3>
         <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des notes des étudiants (recherche étudiant avec photo, choix module avec code et coefficient, enregistrement, modification et suppression).</p>
         <a href="bulletin/bulletin.php">Accéder au formulaire</a> | <a href="bulletin/liste.php">Liste</a>
     </div>
 
     <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">PV (Procès-Verbal)</h3>
+        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Consultation du PV GLOBAL par filière, calcul automatique des moyennes générales, Moyenne, Moy.Min, Moy.Max et impression.</p>
+        <a href="pv/pv.php">Consulter le PV</a>
+    </div>
+
+    <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">Statistiques</h3>
+        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Visualisation des effectifs d'étudiants par sexe (Histogramme et Diagramme circulaire Chart.js) et détails par filière.</p>
+        <a href="statistiques/statistiques.php">Voir les graphiques</a>
+    </div>
+
+    <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
         <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">Tables</h3>
-        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des tables de référence : Nationalités, Sports, et Filières.</p>
+        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des tables de référence : Nationalités, Sports, Filières et Voyages.</p>
         <a href="tables.php">Ouvrir le sous-menu</a>
+    </div>
+
+    <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">Voyage</h3>
+        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des voyages étudiants (méthodes de voyage : Train, Car, Flight, accompagnement, description et recherche par ID).</p>
+        <a href="voyage/voyage.php">Accéder au formulaire</a> | <a href="voyage/liste.php">Liste</a>
     </div>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

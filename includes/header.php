@@ -31,6 +31,14 @@ $titresBulletin = [
     'Modifier une note'
 ];
 
+$titresPv = [
+    'PV', 'PV Global', 'Procès-Verbal (PV)'
+];
+
+$titresStatistiques = [
+    'Statistiques', 'Statistiques des étudiants'
+];
+
 $titresTables = [
     'Sous-menu Tables',
     'Gestion des nationalités', 'Liste des nationalités', 'Enregistrement nationalité',
@@ -40,13 +48,15 @@ $titresTables = [
     'Gestion des modèles de voiture', 'Liste des modèles de voiture', 'Enregistrement modèle de voiture'
 ];
 
-$isAccueilActive     = ($titre === 'Accueil');
-$isEtudiantsActive   = in_array($titre, $titresEtudiants, true);
-$isEnseignantsActive = in_array($titre, $titresEnseignants, true);
-$isModulesActive     = in_array($titre, $titresModules, true);
-$isVoyagesActive     = in_array($titre, $titresVoyages, true);
-$isBulletinActive    = in_array($titre, $titresBulletin, true);
-$isTablesActive      = in_array($titre, $titresTables, true);
+$isAccueilActive      = ($titre === 'Accueil');
+$isEtudiantsActive    = in_array($titre, $titresEtudiants, true);
+$isEnseignantsActive  = in_array($titre, $titresEnseignants, true);
+$isModulesActive      = in_array($titre, $titresModules, true);
+$isBulletinActive     = in_array($titre, $titresBulletin, true);
+$isPvActive           = in_array($titre, $titresPv, true);
+$isStatistiquesActive = in_array($titre, $titresStatistiques, true);
+$isVoyagesActive      = in_array($titre, $titresVoyages, true);
+$isTablesActive       = in_array($titre, $titresTables, true);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -67,14 +77,16 @@ $isTablesActive      = in_array($titre, $titresTables, true);
         <a href="<?= $base ?>personne/formulaire.php" class="<?= $isEtudiantsActive ? 'active' : '' ?>">Étudiants</a>
         <a href="<?= $base ?>enseignant/enseignant.php" class="<?= $isEnseignantsActive ? 'active' : '' ?>">Enseignants</a>
         <a href="<?= $base ?>module/module.php" class="<?= $isModulesActive ? 'active' : '' ?>">Modules</a>
-        <a href="<?= $base ?>voyage/voyage.php" class="<?= $isVoyagesActive ? 'active' : '' ?>">Voyage</a>
         <a href="<?= $base ?>bulletin/bulletin.php" class="<?= $isBulletinActive ? 'active' : '' ?>">Bulletin de Notes</a>
-        <div class="nav-dropdown <?= $isTablesActive ? 'active' : '' ?>">
-            <a href="<?= $base ?>tables.php" class="nav-dropdown-btn <?= $isTablesActive ? 'active' : '' ?>" id="btn-tables-menu" aria-haspopup="true" aria-expanded="false">Tables ▾</a>
+        <a href="<?= $base ?>pv/pv.php" class="<?= $isPvActive ? 'active' : '' ?>">PV</a>
+        <a href="<?= $base ?>statistiques/statistiques.php" class="<?= $isStatistiquesActive ? 'active' : '' ?>">Statistiques</a>
+        <div class="nav-dropdown <?= ($isTablesActive || $isVoyagesActive) ? 'active' : '' ?>">
+            <a href="<?= $base ?>tables.php" class="nav-dropdown-btn <?= ($isTablesActive || $isVoyagesActive) ? 'active' : '' ?>" id="btn-tables-menu" aria-haspopup="true" aria-expanded="false">Tables ▾</a>
             <div class="nav-dropdown-content" id="submenu-tables">
                 <a href="<?= $base ?>nationalite/nationalite.php" class="<?= in_array($titre, ['Gestion des nationalités', 'Liste des nationalités', 'Enregistrement nationalité'], true) ? 'active' : '' ?>">Nationalité</a>
                 <a href="<?= $base ?>sport/sport.php" class="<?= in_array($titre, ['Gestion des sports', 'Liste des sports', 'Enregistrement du sport'], true) ? 'active' : '' ?>">Sports</a>
                 <a href="<?= $base ?>filiere/filiere.php" class="<?= in_array($titre, ['Gestion des filières', 'Formulaire Filière', 'Liste des filières', 'Enregistrement filière', 'Suppression d’une filière'], true) ? 'active' : '' ?>">Filières</a>
+                <a href="<?= $base ?>voyage/voyage.php" class="<?= $isVoyagesActive ? 'active' : '' ?>">Voyage</a>
             </div>
         </div>
     </div>

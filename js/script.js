@@ -575,6 +575,7 @@ function initBulletin(form) {
                         badgeNote.style.display = 'inline-block';
                     }
                 } else {
+                    if (inputNote) inputNote.value = '';
                     if (inputNoteId) inputNoteId.value = '';
                     if (badgeNote) badgeNote.style.display = 'none';
                 }
@@ -582,6 +583,7 @@ function initBulletin(form) {
         } else {
             if (inputCode) inputCode.value = '';
             if (inputCoeff) inputCoeff.value = '';
+            if (inputNote) inputNote.value = '';
             if (inputNoteId) inputNoteId.value = '';
             if (badgeNote) badgeNote.style.display = 'none';
         }

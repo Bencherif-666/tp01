@@ -1,6 +1,39 @@
 <?php
+// Affichage des erreurs (utile pendant le TP ; à retirer en production)
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/fonctions.php';
+
+// Crée la colonne `drapeau` si elle n'existe pas encore
+$colonneDrapeau = true;
+try {
+    if (!$pdo->query("SHOW COLUMNS FROM nationalite LIKE 'drapeau'")->fetch()) {
+        $pdo->exec("ALTER TABLE nationalite ADD COLUMN drapeau VARCHAR(255) DEFAULT NULL");
+    }
+} catch (PDOException $e) {
+    $colonneDrapeau = false;
+}
+
+// Retourne l'URL à utiliser dans <img src> (fichier local ou URL), ou null
+if (!function_exists('drapeau_url')) {
+    function drapeau_url(?string $drapeau, string $prefixe = '../'): ?string
+    {
+        $drapeau = trim((string)$drapeau);
+        if ($drapeau === '') {
+            return null;
+        }
+        if (preg_match('#^https?://#i', $drapeau)) {
+            return $drapeau;
+        }
+        $fichier = basename($drapeau);
+        if (file_exists(__DIR__ . '/../uploads/drapeaux/' . $fichier)) {
+            return $prefixe . 'uploads/drapeaux/' . rawurlencode($fichier);
+        }
+        return null;
+    }
+}
 
 $numero = trim((string)($_GET['numero'] ?? ''));
 $etudiant = null;
@@ -9,13 +42,24 @@ $erreur = null;
 $totalCoefficients = 0;
 $totalPoints = 0.0;
 
+// Note maximale / minimale (et les modules concernés, en cas d'égalité)
+$noteMax = null;
+$noteMin = null;
+$modulesMax = [];
+$modulesMin = [];
+
 if ($numero !== '') {
-    $stmt = $pdo->prepare('
-        SELECT id, numero, civilite, nom_prenom, filiere, adresse, photo
-        FROM personne
-        WHERE numero = :numero
+    // Si la colonne drapeau est absente, on la remplace par NULL pour ne pas planter
+    $champDrapeau = $colonneDrapeau ? 'n.drapeau' : 'NULL';
+
+    $stmt = $pdo->prepare("
+        SELECT p.id, p.numero, p.civilite, p.nom_prenom, p.filiere, p.adresse, p.photo,
+               n.libelle AS nationalite, $champDrapeau AS drapeau
+        FROM personne p
+        LEFT JOIN nationalite n ON n.code = p.nationalite_code
+        WHERE p.numero = :numero
         LIMIT 1
-    ');
+    ");
     $stmt->execute([':numero' => $numero]);
     $etudiant = $stmt->fetch() ?: null;
 
@@ -37,10 +81,25 @@ if ($numero !== '') {
             $totalCoefficients += $coefficient;
             $totalPoints += (float)$note['note'] * $coefficient;
         }
+
+        // Recherche du maximum et du minimum
+        if ($notes) {
+            $valeurs = array_map(function ($n) { return round((float)$n['note'], 2); }, $notes);
+            $noteMax = max($valeurs);
+            $noteMin = min($valeurs);
+
+            // On ajoute TOUS les modules qui ont la même note max / min
+            foreach ($notes as $note) {
+                $v = round((float)$note['note'], 2);
+                if ($v === $noteMax) { $modulesMax[] = $note['designation']; }
+                if ($v === $noteMin) { $modulesMin[] = $note['designation']; }
+            }
+        }
     }
 }
 
 $moyenne = $totalCoefficients > 0 ? $totalPoints / $totalCoefficients : 0;
+$admis   = $moyenne >= 10;   // PASSED si la moyenne est >= 10
 
 $base = '../';
 $titre = 'Bulletin de Notes';
@@ -127,11 +186,24 @@ require __DIR__ . '/../includes/header.php';
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
+        align-items: center;
     }
     .bl-row strong {
         min-width: 130px;
         color: #475569;
     }
+
+    /* Flag next to the nationality */
+    .bl-flag {
+        height: 22px;
+        width: auto;
+        border: 1px solid #cbd5e1;
+        vertical-align: middle;
+        margin-left: 6px;
+        display: inline-block;
+    }
+    .bl-nat { display: inline-flex; align-items: center; gap: 4px; }
+
     .bl-photo {
         flex: 0 0 auto;
         width: 150px;
@@ -222,6 +294,42 @@ require __DIR__ . '/../includes/header.php';
         font-weight: 700;
     }
 
+    /* Max / Min rows */
+    .bl-table tfoot tr.bl-max th,
+    .bl-table tfoot tr.bl-max td { background: #f0fdf4; }
+    .bl-table tfoot tr.bl-min th,
+    .bl-table tfoot tr.bl-min td { background: #fef2f2; }
+    .bl-extreme-note {
+        font-size: 17px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+    .bl-max .bl-extreme-note { color: #15803d; }
+    .bl-min .bl-extreme-note { color: #b91c1c; }
+    .bl-extreme-mod {
+        display: block;
+        margin-top: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    /* PASSED / FAILED mark */
+    .bl-result-cell { text-align: center !important; padding: 14px !important; }
+    .bl-mark {
+        display: inline-block;
+        min-width: 160px;
+        padding: 10px 28px;
+        border-radius: 8px;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: #fff;
+        text-align: center;
+    }
+    .bl-mark.passed { background: #16a34a; }
+    .bl-mark.failed { background: #dc2626; }
+
     .bl-ok   { color: #15803d; font-weight: 600; }
     .bl-fail { color: #b91c1c; font-weight: 600; }
 
@@ -244,6 +352,7 @@ require __DIR__ . '/../includes/header.php';
         <p class="bl-error"><?= h($erreur) ?></p>
 
     <?php elseif ($etudiant): ?>
+        <?php $srcDrapeau = drapeau_url($etudiant['drapeau'] ?? null); ?>
         <div class="bl-card">
             <section class="bl-info" aria-label="Informations de l'étudiant">
                 <div class="bl-row"><strong>Numéro :</strong> <span><?= h($etudiant['numero']) ?></span></div>
@@ -251,6 +360,16 @@ require __DIR__ . '/../includes/header.php';
                 <div class="bl-row"><strong>Nom / Prénom :</strong> <span><?= h($etudiant['nom_prenom']) ?></span></div>
                 <div class="bl-row"><strong>Filière :</strong> <span><?= h($etudiant['filiere']) ?></span></div>
                 <div class="bl-row"><strong>Adresse :</strong> <span><?= h($etudiant['adresse']) ?></span></div>
+                <div class="bl-row">
+                    <strong>Nationalité :</strong>
+                    <span class="bl-nat">
+                        <?= h($etudiant['nationalite'] ?: '—') ?>
+                        <?php if ($srcDrapeau): ?>
+                            <img class="bl-flag" src="<?= h($srcDrapeau) ?>"
+                                 alt="Drapeau <?= h($etudiant['nationalite']) ?>">
+                        <?php endif; ?>
+                    </span>
+                </div>
             </section>
 
             <div id="cadre-photo" class="bl-photo">
@@ -307,6 +426,35 @@ require __DIR__ . '/../includes/header.php';
                         <tr class="bl-moyenne">
                             <th colspan="4">Moyenne</th>
                             <td colspan="2"><?= number_format($moyenne, 2, ',', ' ') ?></td>
+                        </tr>
+
+                        <!-- Note maximale (tous les modules ex aequo sont listés) -->
+                        <tr class="bl-max">
+                            <th colspan="4">Note maximale</th>
+                            <td colspan="2">
+                                <span class="bl-extreme-note"><?= number_format($noteMax, 2, ',', ' ') ?></span>
+                                <span class="bl-extreme-mod"><?= h(implode(', ', $modulesMax)) ?></span>
+                            </td>
+                        </tr>
+
+                        <!-- Note minimale (tous les modules ex aequo sont listés) -->
+                        <tr class="bl-min">
+                            <th colspan="4">Note minimale</th>
+                            <td colspan="2">
+                                <span class="bl-extreme-note"><?= number_format($noteMin, 2, ',', ' ') ?></span>
+                                <span class="bl-extreme-mod"><?= h(implode(', ', $modulesMin)) ?></span>
+                            </td>
+                        </tr>
+
+                        <!-- Résultat : PASSED (vert) ou FAILED (rouge) -->
+                        <tr>
+                            <td colspan="6" class="bl-result-cell">
+                                <?php if ($admis): ?>
+                                    <span class="bl-mark passed">PASSED</span>
+                                <?php else: ?>
+                                    <span class="bl-mark failed">FAILED</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     </tfoot>
                 </table>

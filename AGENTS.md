@@ -111,6 +111,32 @@ Every page must set, **before** `require includes/header.php`:
   - `etudiants.php` (vue de la classe avec les colonnes Id, image, nom / prenom, Module, Note, Filiere).
   - `supprimer.php` (suppression sécurisée par POST).
 
+## Module Procès-Verbal (PV)
+
+- **Calcul dynamique** :
+  - Choix de filière parmi les 10 options obligatoires : `TC`, `2SC`, `3ISIL`, `3SI`, `M1`, `M2RSSI`, `M2WIC`, `M2ISI`, `1ING`, `2ING`.
+  - Tableau « PV GLOBAL » : colonnes `N° Etudiant`, `NOMS ET PRENOMS`, `MOY.GEN`.
+  - Moyenne générale de chaque étudiant calculée dynamiquement à chaque chargement : `sum(coefficient × note) / sum(coefficients)`, arrondie à 2 décimales.
+  - Statistiques sous le tableau : `Moyenne` (moyenne des moyennes des étudiants de la filière), `Moy.Min` et `Moy.Max`.
+  - Impression dédiée via `window.print()` et `@media print` masquant le menu et les contrôles pour n'imprimer que la feuille officielle du PV.
+- **Fichiers dans `pv/`**:
+  - `pv.php` (formulaire de sélection + tableau PV GLOBAL + synthèse des moyennes + impression).
+  - `index.php` (alias / redirection).
+  - `/tp01/pv.php` (alias à la racine).
+
+## Module Statistiques (Statistiques)
+
+- **Visualisation dynamique des effectifs par sexe (Homme / Femme)** :
+  - Données extraites directement de la table `personne` via la civilité.
+  - Deux graphiques propulsés par Chart.js (v4.4.7 chargé localement depuis `js/chart.umd.min.js` avec secours CDN) :
+    1. Histogramme (`type: 'bar'`) du nombre d'étudiants par sexe.
+    2. Diagramme circulaire (`type: 'pie'`) de la répartition par sexe.
+  - Cartes d'indicateurs (Total étudiants, Hommes avec %, Femmes avec %) et tableau récapitulatif par filière.
+- **Fichiers dans `statistiques/`**:
+  - `statistiques.php` (page principale des graphiques).
+  - `index.php` (alias).
+  - `/tp01/statistiques.php` (alias à la racine).
+
 ## Conventions
 
 - Validation exists in **both** `js/script.js` and PHP (`enregistrer.php`), with duplicate messages and length rules — update both together. JS validation is skipped for `formnovalidate` buttons, so PHP is the real gate.
