@@ -1,5 +1,6 @@
 <?php
 // includes/fonctions.php : petites fonctions utilitaires
+require_once __DIR__ . '/auth.php';
 
 // Échappe le texte avant de l'afficher en HTML (protège contre XSS)
 function h($texte): string

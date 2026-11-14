@@ -48,6 +48,11 @@ $titresTables = [
     'Gestion des modèles de voiture', 'Liste des modèles de voiture', 'Enregistrement modèle de voiture'
 ];
 
+$titresUtilisateurs = [
+    'Gestion des utilisateurs', 'Formulaire Utilisateur', 'Liste des utilisateurs',
+    'Modifier un utilisateur', 'Enregistrement utilisateur', 'Suppression d’un utilisateur'
+];
+
 $isAccueilActive      = ($titre === 'Accueil');
 $isEtudiantsActive    = in_array($titre, $titresEtudiants, true);
 $isEnseignantsActive  = in_array($titre, $titresEnseignants, true);
@@ -57,6 +62,10 @@ $isPvActive           = in_array($titre, $titresPv, true);
 $isStatistiquesActive = in_array($titre, $titresStatistiques, true);
 $isVoyagesActive      = in_array($titre, $titresVoyages, true);
 $isTablesActive       = in_array($titre, $titresTables, true);
+$isUtilisateursActive = in_array($titre, $titresUtilisateurs, true);
+
+$userSession = function_exists('utilisateur_connecte') ? utilisateur_connecte() : null;
+$roleSession = $userSession['role'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -73,22 +82,41 @@ $isTablesActive       = in_array($titre, $titresTables, true);
         <span class="brand-badge">ISIL &bull; Université Djillali Liabes</span>
     </div>
     <div id="menu">
-        <a href="<?= $base ?>index.php" class="<?= $isAccueilActive ? 'active' : '' ?>">Accueil</a>
-        <a href="<?= $base ?>personne/formulaire.php" class="<?= $isEtudiantsActive ? 'active' : '' ?>">Étudiants</a>
-        <a href="<?= $base ?>enseignant/enseignant.php" class="<?= $isEnseignantsActive ? 'active' : '' ?>">Enseignants</a>
-        <a href="<?= $base ?>module/module.php" class="<?= $isModulesActive ? 'active' : '' ?>">Modules</a>
-        <a href="<?= $base ?>bulletin/bulletin.php" class="<?= $isBulletinActive ? 'active' : '' ?>">Bulletin de Notes</a>
-        <a href="<?= $base ?>pv/pv.php" class="<?= $isPvActive ? 'active' : '' ?>">PV</a>
-        <a href="<?= $base ?>statistiques/statistiques.php" class="<?= $isStatistiquesActive ? 'active' : '' ?>">Statistiques</a>
-        <div class="nav-dropdown <?= ($isTablesActive || $isVoyagesActive) ? 'active' : '' ?>">
-            <a href="<?= $base ?>tables.php" class="nav-dropdown-btn <?= ($isTablesActive || $isVoyagesActive) ? 'active' : '' ?>" id="btn-tables-menu" aria-haspopup="true" aria-expanded="false">Tables ▾</a>
-            <div class="nav-dropdown-content" id="submenu-tables">
-                <a href="<?= $base ?>nationalite/nationalite.php" class="<?= in_array($titre, ['Gestion des nationalités', 'Liste des nationalités', 'Enregistrement nationalité'], true) ? 'active' : '' ?>">Nationalité</a>
-                <a href="<?= $base ?>sport/sport.php" class="<?= in_array($titre, ['Gestion des sports', 'Liste des sports', 'Enregistrement du sport'], true) ? 'active' : '' ?>">Sports</a>
-                <a href="<?= $base ?>filiere/filiere.php" class="<?= in_array($titre, ['Gestion des filières', 'Formulaire Filière', 'Liste des filières', 'Enregistrement filière', 'Suppression d’une filière'], true) ? 'active' : '' ?>">Filières</a>
-                <a href="<?= $base ?>voyage/voyage.php" class="<?= $isVoyagesActive ? 'active' : '' ?>">Voyage</a>
+        <?php if ($roleSession === 'User'): ?>
+            <a href="<?= $base ?>bulletin_user.php" class="active">Bulletin de Notes</a>
+            <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
+                <span class="user-pill user" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
+                    👤 <?= h($userSession['email'] ?? 'Utilisateur') ?> (User)
+                </span>
+                <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
             </div>
-        </div>
+        <?php else: ?>
+            <a href="<?= $base ?>index.php" class="<?= $isAccueilActive ? 'active' : '' ?>">Accueil</a>
+            <a href="<?= $base ?>personne/formulaire.php" class="<?= $isEtudiantsActive ? 'active' : '' ?>">Étudiants</a>
+            <a href="<?= $base ?>enseignant/enseignant.php" class="<?= $isEnseignantsActive ? 'active' : '' ?>">Enseignants</a>
+            <a href="<?= $base ?>module/module.php" class="<?= $isModulesActive ? 'active' : '' ?>">Modules</a>
+            <a href="<?= $base ?>bulletin/bulletin.php" class="<?= $isBulletinActive ? 'active' : '' ?>">Bulletin de Notes</a>
+            <a href="<?= $base ?>pv/pv.php" class="<?= $isPvActive ? 'active' : '' ?>">PV</a>
+            <a href="<?= $base ?>statistiques/statistiques.php" class="<?= $isStatistiquesActive ? 'active' : '' ?>">Statistiques</a>
+            <div class="nav-dropdown <?= ($isTablesActive || $isVoyagesActive) ? 'active' : '' ?>">
+                <a href="<?= $base ?>tables.php" class="nav-dropdown-btn <?= ($isTablesActive || $isVoyagesActive) ? 'active' : '' ?>" id="btn-tables-menu" aria-haspopup="true" aria-expanded="false">Tables ▾</a>
+                <div class="nav-dropdown-content" id="submenu-tables">
+                    <a href="<?= $base ?>nationalite/nationalite.php" class="<?= in_array($titre, ['Gestion des nationalités', 'Liste des nationalités', 'Enregistrement nationalité'], true) ? 'active' : '' ?>">Nationalité</a>
+                    <a href="<?= $base ?>sport/sport.php" class="<?= in_array($titre, ['Gestion des sports', 'Liste des sports', 'Enregistrement du sport'], true) ? 'active' : '' ?>">Sports</a>
+                    <a href="<?= $base ?>filiere/filiere.php" class="<?= in_array($titre, ['Gestion des filières', 'Formulaire Filière', 'Liste des filières', 'Enregistrement filière', 'Suppression d’une filière'], true) ? 'active' : '' ?>">Filières</a>
+                    <a href="<?= $base ?>voyage/voyage.php" class="<?= $isVoyagesActive ? 'active' : '' ?>">Voyage</a>
+                </div>
+            </div>
+            <a href="<?= $base ?>utilisateur/utilisateur.php" class="<?= $isUtilisateursActive ? 'active' : '' ?>">Utilisateurs</a>
+            <?php if ($userSession): ?>
+                <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
+                    <span class="user-pill admin" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
+                        👑 <?= h($userSession['email'] ?? 'Admin') ?> (Admin)
+                    </span>
+                    <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
     <hr>
     <h2><?= h($titre) ?></h2>

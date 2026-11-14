@@ -55,5 +55,11 @@ require __DIR__ . '/includes/header.php';
         <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des voyages étudiants (méthodes de voyage : Train, Car, Flight, accompagnement, description et recherche par ID).</p>
         <a href="voyage/voyage.php">Accéder au formulaire</a> | <a href="voyage/liste.php">Liste</a>
     </div>
+
+    <div style="background: var(--bg-subtle); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 20px;">
+        <h3 style="margin: 0 0 8px 0; color: var(--text-heading);">Utilisateurs</h3>
+        <p style="margin: 0 0 14px 0; color: var(--text-muted); font-size: 13.5px;">Gestion des comptes utilisateurs et des rôles (Admin / User), ajout, modification et suppression.</p>
+        <a href="utilisateur/utilisateur.php">Gérer les utilisateurs</a> | <a href="utilisateur/liste.php">Liste</a>
+    </div>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>
