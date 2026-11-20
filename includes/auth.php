@@ -46,6 +46,33 @@ function est_user(): bool
 }
 
 /**
+ * Vérifie si l'utilisateur connecté a le rôle Analyst
+ */
+function est_analyst(): bool
+{
+    $u = utilisateur_connecte();
+    return $u !== null && (($u['role'] ?? '') === 'Analyst');
+}
+
+/**
+ * Vérifie si l'utilisateur connecté a le rôle Enseignant
+ */
+function est_enseignant(): bool
+{
+    $u = utilisateur_connecte();
+    return $u !== null && (($u['role'] ?? '') === 'Enseignant');
+}
+
+/**
+ * Vérifie si l'utilisateur connecté a le rôle Controller
+ */
+function est_controller(): bool
+{
+    $u = utilisateur_connecte();
+    return $u !== null && (($u['role'] ?? '') === 'Controller');
+}
+
+/**
  * Enregistre l'utilisateur en session lors de la connexion
  */
 function connecter_utilisateur(array $user): void
@@ -154,6 +181,43 @@ function verifier_acces_automatique(): void
             header('Location: ' . $base . 'bulletin_user.php?erreur=' . urlencode('Accès refusé. Cette page est réservée aux administrateurs.'));
             exit;
         }
+    }
+
+    // Analyst: accès limité aux statistiques
+    if (est_analyst()) {
+        $scriptsAutorisesAnalyst = [
+            'statistiques.php',
+            'statistiques/statistiques.php',
+            'statistiques/index.php',
+            'communication/inbox.php',
+            'communication/mark_read.php',
+        ];
+        if (!in_array($relPath, $scriptsAutorisesAnalyst, true)) {
+            header('Location: ' . $base . 'statistiques/statistiques.php');
+            exit;
+        }
+    }
+
+    // Enseignant: accès limité au formulaire et aux actions associées
+    if (est_enseignant()) {
+        $scriptsAutorisesEnseignant = [
+            'enseignant/enseignant.php',
+            'enseignant/enregistrer.php',
+            'enseignant/liste.php',
+            'enseignant/etudiants.php',
+            'communication/inbox.php',
+            'communication/mark_read.php',
+        ];
+        if (!in_array($relPath, $scriptsAutorisesEnseignant, true)) {
+            header('Location: ' . $base . 'enseignant/enseignant.php');
+            exit;
+        }
+    }
+
+    // Controller: accès limité au tableau de bord des communications
+    if (est_controller() && $relPath !== 'communication/controller.php') {
+        header('Location: ' . $base . 'communication/controller.php');
+        exit;
     }
 }
 

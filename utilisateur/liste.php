@@ -89,7 +89,16 @@ require __DIR__ . '/../includes/header.php';
                     </td>
                     <td>
                         <span class="user-pill <?= $u['role'] === 'Admin' ? 'admin' : 'user' ?>" style="font-size: 11.5px; padding: 3px 10px;">
-                            <?= $u['role'] === 'Admin' ? '👑 Admin' : '👤 User' ?>
+                            <?php
+                            $roleLabelsListe = [
+                                'Admin' => '👑 Admin',
+                                'User' => '👤 User',
+                                'Analyst' => '📊 Analyst',
+                                'Enseignant' => '🎓 Enseignant',
+                                'Controller' => '📨 Controller',
+                            ];
+                            echo h($roleLabelsListe[$u['role']] ?? $u['role']);
+                            ?>
                         </span>
                     </td>
                     <td>

@@ -82,6 +82,7 @@ $messageSucces = '';
 
 if (!$erreurs) {
     try {
+        $profilUserId = est_enseignant() ? (int)(utilisateur_connecte()['id'] ?? 0) : null;
         if ($action === 'modifier') {
             if ($idValide === null) {
                 $erreurs[] = "Veuillez préciser l'identifiant (ID) de l'enseignant à modifier.";
@@ -154,9 +155,9 @@ if (!$erreurs) {
                 } else {
                     $stmt = $pdo->prepare(
                         'INSERT INTO enseignant
-                         (id, numero, civilite, nom_prenom, adresse, date_naissance, lieu_naissance, pays, grade, specialite, filiere, modules)
+                         (id, numero, civilite, nom_prenom, adresse, date_naissance, lieu_naissance, pays, grade, specialite, filiere, modules, user_id)
                          VALUES
-                         (:id, :numero, :civilite, :nom_prenom, :adresse, :date_naissance, :lieu_naissance, :pays, :grade, :specialite, :filiere, :modules)'
+                         (:id, :numero, :civilite, :nom_prenom, :adresse, :date_naissance, :lieu_naissance, :pays, :grade, :specialite, :filiere, :modules, :user_id)'
                     );
                     $stmt->execute([
                         ':id'             => $idValide,
@@ -171,15 +172,16 @@ if (!$erreurs) {
                         ':specialite'     => $specialite,
                         ':filiere'        => $filiere,
                         ':modules'        => $modulesStr,
+                        ':user_id'        => $profilUserId,
                     ]);
                     $messageSucces = "Enseignant ajouté avec succès (ID {$idValide}).";
                 }
             } else {
                 $stmt = $pdo->prepare(
                     'INSERT INTO enseignant
-                     (numero, civilite, nom_prenom, adresse, date_naissance, lieu_naissance, pays, grade, specialite, filiere, modules)
+                     (numero, civilite, nom_prenom, adresse, date_naissance, lieu_naissance, pays, grade, specialite, filiere, modules, user_id)
                      VALUES
-                     (:numero, :civilite, :nom_prenom, :adresse, :date_naissance, :lieu_naissance, :pays, :grade, :specialite, :filiere, :modules)'
+                     (:numero, :civilite, :nom_prenom, :adresse, :date_naissance, :lieu_naissance, :pays, :grade, :specialite, :filiere, :modules, :user_id)'
                 );
                 $stmt->execute([
                     ':numero'         => $numero,
@@ -193,6 +195,7 @@ if (!$erreurs) {
                     ':specialite'     => $specialite,
                     ':filiere'        => $filiere,
                     ':modules'        => $modulesStr,
+                    ':user_id'        => $profilUserId,
                 ]);
                 $nouvelId = (int)$pdo->lastInsertId();
                 $messageSucces = "Enseignant ajouté avec succès (ID {$nouvelId}).";

@@ -38,7 +38,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (!in_array($role, ['Admin', 'User'], true)) {
+if (!in_array($role, ['Admin', 'User', 'Analyst', 'Enseignant', 'Controller'], true)) {
     $cible = $idValide ? "utilisateur.php?id={$idValide}&erreur=" : "utilisateur.php?erreur=";
     header('Location: ' . $cible . urlencode("Le rôle sélectionné est invalide."));
     exit;
@@ -69,6 +69,11 @@ if ($idValide === null) {
         ':role'  => $role,
     ]);
     $newId = $pdo->lastInsertId();
+
+    if ($role === 'Analyst') {
+        $stmtProfile = $pdo->prepare('INSERT IGNORE INTO analyst (user_id) VALUES (:user_id)');
+        $stmtProfile->execute([':user_id' => $newId]);
+    }
 
     header('Location: utilisateur.php?succes=' . urlencode("Utilisateur {$email} (ID #{$newId}) créé avec succès."));
     exit;

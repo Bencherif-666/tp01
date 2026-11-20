@@ -8,6 +8,16 @@ function h($texte): string
     return htmlspecialchars((string)$texte, ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * Compte les messages internes non lus d'un utilisateur.
+ */
+function nombre_messages_nonlus(PDO $pdo, int $userId): int
+{
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM communication_message WHERE recipient_id = :recipient_id AND read_at IS NULL');
+    $stmt->execute([':recipient_id' => $userId]);
+    return (int)$stmt->fetchColumn();
+}
+
 // Récupère une liste de cases cochées (checkbox) en gardant seulement les valeurs autorisées
 function post_liste(string $nom, array $autorises): array
 {
