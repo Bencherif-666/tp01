@@ -63,6 +63,8 @@ if ($personne && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $numero        = $champPost('numero');
     $civilite      = $champPost('civilite');
     $nomPrenom     = $champPost('nom_prenom');
+    $emailSaisi    = $_POST['email'] ?? '';
+    $email         = is_string($emailSaisi) ? trim($emailSaisi) : '';
     $filiere       = $champPost('filiere');
     $adresse       = $champPost('adresse');
     $codePostal    = $champPost('code_postal');
@@ -86,6 +88,9 @@ if ($personne && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($nomPrenom === '' || mb_strlen($nomPrenom) > 80) {
         $erreurs[] = "Nom / Prénom obligatoire (80 caractères max).";
+    }
+    if (!is_string($emailSaisi) || ($email !== '' && (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 255))) {
+        $erreurs[] = "Adresse e-mail invalide (255 caractères maximum).";
     }
     if ($adresse === '' || mb_strlen($adresse) > 150) {
         $erreurs[] = "Adresse obligatoire (150 caractères max).";
@@ -129,7 +134,7 @@ if ($personne && $_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare(
                 'UPDATE personne
-                 SET numero = :numero, civilite = :civilite, nom_prenom = :nom, filiere = :filiere,
+                 SET numero = :numero, civilite = :civilite, nom_prenom = :nom, email = :email, filiere = :filiere,
                      adresse = :adresse, code_postal = :cp, localite = :localite,
                      pays = :pays, plateformes = :plateformes, applications = :applications,
                      transport = :transport, sport = :sport, activites = :activites,
@@ -141,6 +146,7 @@ if ($personne && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':numero'         => $numero,
                 ':civilite'       => $civilite,
                 ':nom'            => $nomPrenom,
+                ':email'          => $email !== '' ? $email : null,
                 ':filiere'        => $filiere,
                 ':adresse'        => $adresse,
                 ':cp'             => $codePostal,
@@ -233,6 +239,7 @@ require __DIR__ . '/../includes/header.php';
                 <?php endforeach; ?></td>
             </tr>
             <tr><td>Nom / Prénom :</td><td><input type="text" name="nom_prenom" maxlength="80" value="<?= h($personne['nom_prenom']) ?>" required></td></tr>
+            <tr><td>Adresse e-mail :</td><td><input type="email" name="email" maxlength="255" value="<?= h($personne['email'] ?? '') ?>" placeholder="etudiant@exemple.com"></td></tr>
             <tr>
                 <td>Filière :</td>
                 <td>

@@ -13,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $numero        = trim($_POST['numero'] ?? '');
 $civilite      = $_POST['civilite'] ?? '';
 $nomPrenom     = trim($_POST['nom_prenom'] ?? '');
+$emailSaisi    = $_POST['email'] ?? '';
+$email         = is_string($emailSaisi) ? trim($emailSaisi) : '';
 $filiere       = trim($_POST['filiere'] ?? '');
 $adresse       = trim($_POST['adresse'] ?? '');
 $codePostal    = trim($_POST['code_postal'] ?? '');
@@ -67,6 +69,9 @@ if ($idFormulaire !== '') {
 if (!preg_match('/^[0-9]{1,10}$/', $numero))            $erreurs[] = "Numéro invalide (chiffres uniquement).";
 if (!in_array($civilite, $CIVILITES, true))              $erreurs[] = "Civilité invalide.";
 if ($nomPrenom === '' || mb_strlen($nomPrenom) > 80)     $erreurs[] = "Nom / Prénom obligatoire (80 caractères max).";
+if (!is_string($emailSaisi) || ($email !== '' && (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 255))) {
+    $erreurs[] = "Adresse e-mail invalide (255 caractères maximum).";
+}
 if ($adresse === '' || mb_strlen($adresse) > 150)        $erreurs[] = "Adresse obligatoire (150 caractères max).";
 if (!preg_match('/^[0-9]{4,10}$/', $codePostal))         $erreurs[] = "Code postal invalide.";
 if ($localite === '' || mb_strlen($localite) > 60)       $erreurs[] = "Localité obligatoire (60 caractères max).";
@@ -100,6 +105,7 @@ if (!$erreurs) {
             ':numero'         => $numero,
             ':civilite'       => $civilite,
             ':nom'            => $nomPrenom,
+            ':email'          => $email !== '' ? $email : null,
             ':filiere'        => $filiere,
             ':adresse'        => $adresse,
             ':cp'             => $codePostal,
@@ -119,7 +125,7 @@ if (!$erreurs) {
 
         if ($idPersonne !== null && $personneExistante) {
             $sql = 'UPDATE personne
-                    SET numero = :numero, civilite = :civilite, nom_prenom = :nom, filiere = :filiere,
+                    SET numero = :numero, civilite = :civilite, nom_prenom = :nom, email = :email, filiere = :filiere,
                         adresse = :adresse, code_postal = :cp, localite = :localite, pays = :pays,
                         plateformes = :plateformes, applications = :applications,
                         transport = :transport, sport = :sport, activites = :activites,
@@ -133,10 +139,10 @@ if (!$erreurs) {
             $colonnes = $idPersonne === null ? '' : 'id, ';
             $parametreId = $idPersonne === null ? '' : ':id, ';
             $sql = 'INSERT INTO personne
-                    (' . $colonnes . 'numero, civilite, nom_prenom, filiere, adresse, code_postal, localite, pays,
+                    (' . $colonnes . 'numero, civilite, nom_prenom, email, filiere, adresse, code_postal, localite, pays,
                      plateformes, applications, transport, sport, activites, modules, groupe_sanguin, modele_voiture, nationalite_code, photo)
                     VALUES
-                    (' . $parametreId . ':numero, :civilite, :nom, :filiere, :adresse, :cp, :localite, :pays,
+                    (' . $parametreId . ':numero, :civilite, :nom, :email, :filiere, :adresse, :cp, :localite, :pays,
                      :plateformes, :applications, :transport, :sport, :activites, :modules, :groupe_sanguin, :modele_voiture, :nat, :photo)';
             if ($idPersonne !== null) {
                 $valeurs[':id'] = $idPersonne;

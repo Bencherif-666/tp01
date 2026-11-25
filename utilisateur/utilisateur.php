@@ -61,6 +61,12 @@ require __DIR__ . '/../includes/header.php';
     </div>
 <?php endif; ?>
 
+<div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+    <a href="../communication/admin.php" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-md);background:var(--primary);color:#fff;font-weight:600;text-decoration:none;box-shadow:0 2px 6px var(--primary-glow);">
+        📨 Envoyer un message
+    </a>
+</div>
+
 <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 30px; box-shadow: var(--shadow-sm);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border-light); padding-bottom: 12px;">
         <h3 style="margin: 0; color: var(--text-heading); font-size: 17px;">
@@ -98,6 +104,9 @@ require __DIR__ . '/../includes/header.php';
                     <select name="role" id="role" required style="width: 200px;">
                         <option value="User" <?= (($userEdite['role'] ?? 'User') === 'User') ? 'selected' : '' ?>>User</option>
                         <option value="Admin" <?= (($userEdite['role'] ?? '') === 'Admin') ? 'selected' : '' ?>>Admin</option>
+                        <option value="Analyst" <?= (($userEdite['role'] ?? '') === 'Analyst') ? 'selected' : '' ?>>Analyst</option>
+                        <option value="Enseignant" <?= (($userEdite['role'] ?? '') === 'Enseignant') ? 'selected' : '' ?>>Enseignant</option>
+                        <option value="Controller" <?= (($userEdite['role'] ?? '') === 'Controller') ? 'selected' : '' ?>>Controller</option>
                     </select>
                 </td>
             </tr>
@@ -161,7 +170,16 @@ require __DIR__ . '/../includes/header.php';
                         </td>
                         <td>
                             <span class="user-pill <?= $u['role'] === 'Admin' ? 'admin' : 'user' ?>" style="font-size: 11.5px; padding: 3px 10px;">
-                                <?= $u['role'] === 'Admin' ? '👑 Admin' : '👤 User' ?>
+                                <?php
+                                $roleLabels = [
+                                    'Admin' => '👑 Admin',
+                                    'User' => '👤 User',
+                                    'Analyst' => '📊 Analyst',
+                                    'Enseignant' => '🎓 Enseignant',
+                                    'Controller' => '📨 Controller',
+                                ];
+                                echo h($roleLabels[$u['role']] ?? $u['role']);
+                                ?>
                             </span>
                         </td>
                         <td>

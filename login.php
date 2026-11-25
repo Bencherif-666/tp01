@@ -8,6 +8,15 @@ if (est_connecte()) {
     if (est_admin()) {
         header('Location: index.php');
         exit;
+    } elseif (est_analyst()) {
+        header('Location: statistiques/statistiques.php');
+        exit;
+    } elseif (est_enseignant()) {
+        header('Location: enseignant/enseignant.php');
+        exit;
+    } elseif (est_controller()) {
+        header('Location: communication/controller.php');
+        exit;
     } else {
         header('Location: bulletin_user.php');
         exit;
@@ -34,6 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             connecter_utilisateur($user);
             if ($user['role'] === 'Admin') {
                 header('Location: index.php');
+                exit;
+            } elseif ($user['role'] === 'Analyst') {
+                header('Location: statistiques/statistiques.php');
+                exit;
+            } elseif ($user['role'] === 'Enseignant') {
+                header('Location: enseignant/enseignant.php');
+                exit;
+            } elseif ($user['role'] === 'Controller') {
+                header('Location: communication/controller.php');
                 exit;
             } else {
                 header('Location: bulletin_user.php');

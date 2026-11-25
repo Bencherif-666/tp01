@@ -8,6 +8,15 @@ if (est_connecte()) {
     if (est_admin()) {
         header('Location: index.php');
         exit;
+    } elseif (est_analyst()) {
+        header('Location: statistiques/statistiques.php');
+        exit;
+    } elseif (est_enseignant()) {
+        header('Location: enseignant/enseignant.php');
+        exit;
+    } elseif (est_controller()) {
+        header('Location: communication/controller.php');
+        exit;
     } else {
         header('Location: bulletin_user.php');
         exit;
@@ -16,15 +25,13 @@ if (est_connecte()) {
 
 $erreur = null;
 $emailSaisi = '';
-$roleSaisi  = 'User';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim((string)($_POST['email'] ?? ''));
     $mdp   = (string)($_POST['mdp'] ?? '');
-    $role  = trim((string)($_POST['role'] ?? 'User'));
+    $role  = 'User';
 
     $emailSaisi = $email;
-    $roleSaisi  = in_array($role, ['Admin', 'User'], true) ? $role : 'User';
 
     if ($email === '') {
         $erreur = "Veuillez renseigner une adresse email.";
@@ -32,8 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreur = "Format d'adresse email invalide.";
     } elseif ($mdp === '') {
         $erreur = "Le mot de passe ne peut pas être vide.";
-    } elseif (!in_array($role, ['Admin', 'User'], true)) {
-        $erreur = "Rôle invalide.";
     } else {
         // Vérifier l'unicité de l'adresse email
         $stmtCheck = $pdo->prepare('SELECT id FROM `user` WHERE email = :email LIMIT 1');
@@ -50,8 +55,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':mdp'   => $hashMdp,
                 ':role'  => $role,
             ]);
+            $userId = (int)$pdo->lastInsertId();
 
-            header('Location: login.php?succes=' . urlencode("Inscription réussie ! Vous pouvez maintenant vous connecter."));
+            if ($role === 'Analyst') {
+                $stmtProfile = $pdo->prepare('INSERT IGNORE INTO analyst (user_id) VALUES (:user_id)');
+                $stmtProfile->execute([':user_id' => $userId]);
+            }
+
+            $user = [
+                'id' => $userId,
+                'email' => $email,
+                'role' => $role,
+            ];
+            connecter_utilisateur($user);
+
+            if ($role === 'Analyst') {
+                header('Location: statistiques/statistiques.php');
+            } elseif ($role === 'Enseignant') {
+                header('Location: enseignant/enseignant.php');
+            } elseif ($role === 'Controller') {
+                header('Location: communication/controller.php');
+            } else {
+                header('Location: ' . ($role === 'Admin' ? 'index.php' : 'bulletin_user.php'));
+            }
             exit;
         }
     }
@@ -220,14 +246,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="auth-form-group">
                 <label for="mdp">Mots de Passe</label>
                 <input type="password" name="mdp" id="mdp" placeholder="Choisir un mot de passe sécurisé" required>
-            </div>
-
-            <div class="auth-form-group">
-                <label for="role">Type User</label>
-                <select name="role" id="role" required>
-                    <option value="User" <?= $roleSaisi === 'User' ? 'selected' : '' ?>>User</option>
-                    <option value="Admin" <?= $roleSaisi === 'Admin' ? 'selected' : '' ?>>Admin</option>
-                </select>
             </div>
 
             <div class="auth-actions">

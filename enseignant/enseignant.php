@@ -19,7 +19,16 @@ $idRecherche = trim((string)($_GET['id'] ?? ''));
 $enseignant = null;
 $messageRecherche = null;
 
-if ($idRecherche !== '') {
+if (est_enseignant()) {
+    $u = utilisateur_connecte();
+    $stmt = $pdo->prepare('SELECT * FROM enseignant WHERE user_id = :user_id');
+    $stmt->execute([':user_id' => (int)$u['id']]);
+    $enseignant = $stmt->fetch() ?: null;
+    if ($enseignant) {
+        $messageRecherche = "Votre profil enseignant est déjà enregistré.";
+        $idRecherche = (string)$enseignant['id'];
+    }
+} elseif ($idRecherche !== '') {
     $idValide = filter_var($idRecherche, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
     if ($idValide !== false) {
         $stmt = $pdo->prepare('SELECT * FROM enseignant WHERE id = :id');
