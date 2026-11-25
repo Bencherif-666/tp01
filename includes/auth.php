@@ -177,6 +177,12 @@ function verifier_acces_automatique(): void
         exit;
     }
 
+    $role = (string)(utilisateur_connecte()['role'] ?? '');
+    if (!in_array($role, ['Admin', 'User', 'Analyst', 'Enseignant', 'Controller'], true)) {
+        header('Location: ' . $base . 'login.php?erreur=' . urlencode('Rôle utilisateur inconnu.'));
+        exit;
+    }
+
     // Si connecté en tant que User ordinaire
     if (est_user()) {
         // Le rôle User ne peut accéder qu'à bulletin_user.php

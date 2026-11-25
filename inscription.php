@@ -25,15 +25,13 @@ if (est_connecte()) {
 
 $erreur = null;
 $emailSaisi = '';
-$roleSaisi  = 'User';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim((string)($_POST['email'] ?? ''));
     $mdp   = (string)($_POST['mdp'] ?? '');
-    $role  = trim((string)($_POST['role'] ?? 'User'));
+    $role  = 'User';
 
     $emailSaisi = $email;
-    $roleSaisi  = in_array($role, ['Admin', 'User', 'Analyst', 'Enseignant', 'Controller'], true) ? $role : 'User';
 
     if ($email === '') {
         $erreur = "Veuillez renseigner une adresse email.";
@@ -41,8 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreur = "Format d'adresse email invalide.";
     } elseif ($mdp === '') {
         $erreur = "Le mot de passe ne peut pas être vide.";
-    } elseif (!in_array($role, ['Admin', 'User', 'Analyst', 'Enseignant', 'Controller'], true)) {
-        $erreur = "Rôle invalide.";
     } else {
         // Vérifier l'unicité de l'adresse email
         $stmtCheck = $pdo->prepare('SELECT id FROM `user` WHERE email = :email LIMIT 1');
@@ -250,17 +246,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="auth-form-group">
                 <label for="mdp">Mots de Passe</label>
                 <input type="password" name="mdp" id="mdp" placeholder="Choisir un mot de passe sécurisé" required>
-            </div>
-
-            <div class="auth-form-group">
-                <label for="role">Type User</label>
-                <select name="role" id="role" required>
-                    <option value="User" <?= $roleSaisi === 'User' ? 'selected' : '' ?>>User</option>
-                    <option value="Admin" <?= $roleSaisi === 'Admin' ? 'selected' : '' ?>>Admin</option>
-                    <option value="Analyst" <?= $roleSaisi === 'Analyst' ? 'selected' : '' ?>>Analyst</option>
-                    <option value="Enseignant" <?= $roleSaisi === 'Enseignant' ? 'selected' : '' ?>>Enseignant</option>
-                    <option value="Controller" <?= $roleSaisi === 'Controller' ? 'selected' : '' ?>>Controller</option>
-                </select>
             </div>
 
             <div class="auth-actions">

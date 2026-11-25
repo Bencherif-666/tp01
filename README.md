@@ -1,5 +1,17 @@
 # Session, style, and report card email configuration
 
+## Tests
+
+The dependency-free test suite checks PHP syntax, shared helpers, session/authentication behavior, role access, and every public PHP endpoint. It creates a uniquely named temporary MySQL database, imports the project schema and seed data, starts PHP’s built-in server, then drops only that temporary database.
+
+Start MySQL, then run:
+
+```sh
+./tests/run.sh
+```
+
+By default the runner uses `/opt/lampp/bin/php`, `/opt/lampp/bin/mysql`, and the project’s XAMPP defaults (`localhost:3306`, `root`, empty password). Override `PHP_BIN`, `MYSQL_BIN`, `TP_BN_DB_HOST`, `TP_BN_DB_PORT`, `TP_BN_DB_USER`, and `TP_BN_DB_PASSWORD` for another local setup. It never connects to or modifies the configured `tp01_paw` database.
+
 ## Added files
 
 - `includes/bulletin_mail.php`: PDO loading and report card HTML/text generation.
