@@ -1,37 +1,37 @@
-# Configuration des sessions, du style et de l’envoi des bulletins
+# Session, style, and report card email configuration
 
-## Fichiers ajoutés
+## Added files
 
-- `includes/bulletin_mail.php` : chargement PDO et génération HTML/texte du bulletin.
-- `bulletin/send_mail_native.php` et `bulletin/send_mail_phpmailer.php` : envois protégés admin/CSRF.
-- `config/mail.example.php` : modèle de configuration SMTP ; `config/mail.php` est local et ignoré par Git.
-- `database/migration_student_email.sql` : ajout de `personne.email` (nullable).
+- `includes/bulletin_mail.php`: PDO loading and report card HTML/text generation.
+- `bulletin/send_mail_native.php` and `bulletin/send_mail_phpmailer.php`: Admin/CSRF-protected sending.
+- `config/mail.example.php`: SMTP configuration template; `config/mail.php` is local and ignored by Git.
+- `database/migration_student_email.sql`: adds nullable `personne.email`.
 
 ## Installation
 
-Exécutez `database/migration_student_email.sql` dans la base `tp01_paw`. Renseignez ensuite les adresses depuis les formulaires Étudiants ou directement dans `personne.email`. La connexion stocke l’identifiant, l’adresse utilisée comme nom d’utilisateur et le rôle dans la session ; les pages applicatives utilisent le contrôle d’accès existant.
+Run `database/migration_student_email.sql` against the `tp01_paw` database. Then enter email addresses through the Student forms or directly in `personne.email`. Login stores the identifier, username email address, and role in the session; application pages use the existing access control.
 
-La feuille commune `css/style.css` est chargée par l’en-tête partagé et par la page de connexion. Le bulletin masque navigation, recherche et actions à l’impression.
+The shared `css/style.css` stylesheet is loaded by the shared header and the login page. Report cards hide navigation, search, and actions when printed.
 
-### Envoi natif sous XAMPP Windows
+### Native sending on XAMPP for Windows
 
-Dans le `php.ini` réellement utilisé par Apache, sous `[mail function]`, définissez la ligne :
+In the `php.ini` file actually used by Apache, under `[mail function]`, set:
 
 ```ini
 sendmail_path = "\"C:\xampp\mailtodisk\mailtodisk.exe\""
 ```
 
-Cette configuration envoie les messages vers le dossier de sortie de XAMPP (`C:\xampp\mailoutput`) ; vérifiez que le chemin correspond à votre installation. Enregistrez `php.ini`, puis redémarrez Apache depuis le panneau XAMPP. Aucun fichier système n’est modifié par ce projet.
+This configuration sends messages to XAMPP's output folder (`C:\xampp\mailoutput`). Verify that the path matches your installation. Save `php.ini`, then restart Apache from the XAMPP control panel. This project does not modify any system files.
 
-### PHPMailer / Gmail
+### PHPMailer/Gmail
 
-Si Composer est disponible, lancez `composer require phpmailer/phpmailer` à la racine du projet. Composer n’étant pas installé dans cet environnement, les sources officielles PHPMailer 6.10.0 (`Exception.php`, `PHPMailer.php`, `SMTP.php`, avec leur licence) sont incluses sous `vendor/phpmailer/phpmailer/src/` et chargées par espace de noms, sans `PHPMailerAutoload.php`.
+If Composer is available, run `composer require phpmailer/phpmailer` from the project root. Since Composer is not installed in this environment, the official PHPMailer 6.10.0 sources (`Exception.php`, `PHPMailer.php`, `SMTP.php`, and their license) are included under `vendor/phpmailer/phpmailer/src/` and loaded by namespace, without `PHPMailerAutoload.php`.
 
-Copiez `config/mail.example.php` en `config/mail.php` et renseignez l’adresse Gmail et le mot de passe d’application. Pour obtenir celui-ci : activez la validation en deux étapes dans le compte Google, puis créez un mot de passe d’application dans les paramètres de sécurité Google. Utilisez ce mot de passe à 16 caractères, jamais le mot de passe Gmail habituel. Le débogage SMTP est désactivé par défaut.
+Copy `config/mail.example.php` to `config/mail.php` and enter the Gmail address and app password. To obtain an app password, enable two-step verification on the Google account, then create an app password in the Google security settings. Use this 16-character password, never the regular Gmail password. SMTP debugging is disabled by default.
 
-## Vérification manuelle
+## Manual verification
 
-1. Connectez-vous avec un compte Admin et vérifiez que le nom de compte et « Déconnexion » apparaissent. Testez une page protégée sans session (redirection vers la connexion), puis cliquez « Déconnexion » et vérifiez que la session est terminée.
-2. Ouvrez le bulletin d’un étudiant dont `personne.email` est défini. Vérifiez l’affichage responsive et l’aperçu avant impression, qui doit exclure navigation, recherche et boutons.
-3. Configurez `php.ini`, redémarrez Apache et cliquez « Envoyer Mail (sans PHPMailer) » ; vérifiez la confirmation et le fichier dans `mailoutput`.
-4. Configurez `config/mail.php` et PHPMailer, cliquez « Envoyer Mail (avec PHPMailer) », puis vérifiez la confirmation et la réception. Une adresse vide ou invalide doit afficher une erreur.
+1. Log in with an Admin account and verify that the account name and “Déconnexion” appear. Open a protected page without a session (it should redirect to login), then click “Déconnexion” and verify that the session has ended.
+2. Open the report card for a student whose `personne.email` is set. Verify the responsive display and print preview, which should exclude navigation, search, and buttons.
+3. Configure `php.ini`, restart Apache, and click “Envoyer Mail (sans PHPMailer)”; verify the confirmation and the file in `mailoutput`.
+4. Configure `config/mail.php` and PHPMailer, click “Envoyer Mail (avec PHPMailer)”, and verify the confirmation and receipt. An empty or invalid address should display an error.
