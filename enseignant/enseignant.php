@@ -4,6 +4,14 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/fonctions.php';
 require_once __DIR__ . '/../includes/donnees.php';
 
+// Accès réservé aux rôles Admin et Enseignant
+$uCourant = utilisateur_connecte();
+$roleActuel = $uCourant['role'] ?? ($_SESSION['role'] ?? '');
+if (!est_connecte() || !in_array($roleActuel, ['Admin', 'Enseignant', 'Enseignants'], true)) {
+    header('Location: ../login.php');
+    exit;
+}
+
 // Chargement des filières depuis la base de données
 $stmtFilieres = $pdo->query('SELECT nom FROM filiere ORDER BY nom ASC');
 $filieres = $stmtFilieres ? $stmtFilieres->fetchAll(PDO::FETCH_COLUMN) : [];

@@ -1,0 +1,11 @@
+{
+    "id": "20261125_211857_f614cec9",
+    "date": "2026-11-25T21:18:57+01:00",
+    "destinataire": "nvidiabencherif58688@gmail.com",
+    "etudiant": "[Bulletin Officiel] Relevé de notes — Bencherif Guettaf (N° 2)",
+    "sujet": "[Bulletin Officiel] Relevé de notes — Bencherif Guettaf (N° 2)",
+    "methode": "mail()",
+    "succes": false,
+    "erreur": "La fonction mail() n'a pas pu remettre le message (serveur MTA local non configuré ou inactif).",
+    "fichier_html": "20261125_211857_f614cec9.html"
+}

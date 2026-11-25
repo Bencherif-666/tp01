@@ -113,6 +113,7 @@ if (!$erreurs && $etudiant && $module && $noteVal !== null) {
                 $succes = true;
                 $noteFormattee = number_format($noteVal, 2, ',', ' ');
                 $messageSucces = "Note enregistrée avec succès : {$noteFormattee} / 20 pour l'étudiant " . $etudiant['nom_prenom'] . " dans le module " . $module['designation'] . " (" . $module['code_module'] . ").";
+                set_flash_succes($messageSucces);
             }
         }
     } catch (PDOException $e) {

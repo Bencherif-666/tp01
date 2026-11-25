@@ -42,5 +42,6 @@ if (!$userToDelete) {
 $stmtDelete = $pdo->prepare('DELETE FROM `user` WHERE id = :id');
 $stmtDelete->execute([':id' => $idValide]);
 
+set_flash_succes("L'utilisateur {$userToDelete['email']} (ID #{$idValide}) a été supprimé avec succès.");
 header('Location: utilisateur.php?succes=' . urlencode("L'utilisateur {$userToDelete['email']} (ID #{$idValide}) a été supprimé avec succès."));
 exit;

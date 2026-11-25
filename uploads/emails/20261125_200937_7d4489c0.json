@@ -1,0 +1,11 @@
+{
+    "id": "20261125_200937_7d4489c0",
+    "date": "2026-11-25T20:09:37+00:00",
+    "destinataire": "nazim@gmail.com",
+    "etudiant": "[Bulletin Officiel] Relevé de notes — Hamer El ain Nazim (N° 1)",
+    "sujet": "[Bulletin Officiel] Relevé de notes — Hamer El ain Nazim (N° 1)",
+    "methode": "PHPMailer (SMTP)",
+    "succes": false,
+    "erreur": "SMTP Error: Could not connect to SMTP host. Failed to connect to server SMTP server error: Failed to connect to server Additional SMTP info: php_network_getaddresses: getaddrinfo for smtp.gmail.com failed: Name or service not known",
+    "fichier_html": "20261125_200937_7d4489c0.html"
+}

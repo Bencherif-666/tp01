@@ -77,13 +77,21 @@ Every page must set, **before** `require includes/header.php`:
   - FK `note.module_id → module(id)` with `ON DELETE RESTRICT`.
   - Contrainte unique `uk_etudiant_module UNIQUE (etudiant_id, module_id)` pour empêcher les doublons de note pour un même étudiant et même module.
 - **Formulaire & Fonctionnalités**:
-  - Recherche étudiant par ID ou Numéro étudiant (`numero`), affichage automatique de ses informations (numéro, civilité, nom/prénom, filière) et de sa photo (`#cadre-photo`).
+  - Recherche étudiant par ID ou Numéro étudiant (`numero`), affichage automatique de ses informations (numéro, civilité, nom/prénom, filière, email enregistré) et de sa photo (`#cadre-photo`).
   - Sélection de module depuis la table `module` avec affichage automatique de son code module et coefficient.
   - Saisie de la note (entre 0 et 20).
-  - Trois boutons d'action : `Enregistrer` (nouvelle note), `Modifier` (mise à jour d'une note existante), `Supprimer` (suppression après confirmation).
-  - Tableau récapitulatif des notes de l'étudiant recherché avec calcul automatique de la moyenne générale et impression (`window.print()`).
+  - Trois boutons d'action du formulaire : `Enregistrer` (nouvelle note), `Modifier` (mise à jour d'une note existante), `Supprimer` (suppression après confirmation).
+  - Tableau récapitulatif des notes de l'étudiant recherché avec calcul automatique de la moyenne générale, note min, note max et décision (Admis/Ajourné).
+  - **3 Boutons d'Action sur le Bulletin de l'Étudiant** :
+    1. `🖨️ Imprimer le bulletin` : déclenche l'impression officielle via `window.print()` (avec styles `@media print` masquant la navigation et les boutons).
+    2. `✉️ Envoyer par email (mail())` : envoie le bulletin officiel complet par email à l'adresse enregistrée de l'étudiant via la fonction native PHP `mail()`.
+    3. `🚀 Envoyer par email (PHPMailer)` : envoie le bulletin officiel complet par email à l'adresse enregistrée de l'étudiant via la bibliothèque PHPMailer (SMTP).
+  - Les emails contiennent le bulletin officiel complet au format HTML responsive (en-tête académique, coordonnées étudiant, tableau complet des notes avec coefficients et notes pondérées, moyenne générale, notes extrêmes, décision finale ADMIS/AJOURNÉ).
 - **Fichiers dans `bulletin/`**:
-  - `bulletin.php` (formulaire + recherche étudiant + affichage photo & relevé).
+  - `bulletin.php` (formulaire + recherche étudiant + affichage photo & relevé + les 3 boutons d'action).
+  - `afficher_bulletin.php` (vue complète du bulletin avec les 3 boutons d'action).
+  - `envoyer_bulletin.php` (contrôleur d'expédition par email via `mail()` ou `PHPMailer`).
+  - `apercu_email.php` (visualisation et historique des emails envoyés).
   - `formulaire.php` (alias / include de `bulletin.php`).
   - `enregistrer.php` (contrôle et insertion / mise à jour).
   - `modifier.php` (redirection pour modification préremplie).
@@ -136,6 +144,31 @@ Every page must set, **before** `require includes/header.php`:
   - `statistiques.php` (page principale des graphiques).
   - `index.php` (alias).
   - `/tp01/statistiques.php` (alias à la racine).
+
+## Module Authentification & Rôles (5 Types de Comptes)
+
+- **Rôles disponibles** :
+  1. `Admin` : Accès complet à tous les modules + page dédiée « Envoyer des messages » (`messages/envoyer.php`) + audit contrôleur.
+  2. `User` : Accès restreint uniquement à son espace personnel (`bulletin_user.php`).
+  3. `Analyse` : Accès restreint uniquement aux Statistiques (`statistiques/statistiques.php`) et à sa boîte de réception séparée (`messages/recus.php`).
+  4. `Enseignant` : Accès restreint uniquement au module Enseignants (`enseignant/enseignant.php`) et à sa boîte de réception séparée (`messages/recus.php`).
+  5. `Controller` : Accès restreint au tableau de bord Contrôleur (`messages/controller.php` / `controller/`).
+
+## Module Messagerie & Contrôle (Messages / Controller)
+
+- **Table MySQL** : `message` (`id`, `expediteur_id`, `destinataire_id`, `destinataire_role`, `contenu`, `date_envoi`).
+- **Envoi de message (Admin)** :
+  - `messages/envoyer.php` : menu déroulant groupé listant exclusivement les comptes Enseignants et Analyse, grande zone de texte, bouton « Envoyer », et tableau d'historique des envois récents.
+- **Réception de messages (Comptes Analyse & Enseignant)** :
+  - `messages/recus.php` : page distincte des pages fonctionnelles, numérotation chronologique des messages selon l'ordre d'arrivée depuis l'admin (#1, #2, #3...), affichage de la date/heure et du contenu.
+- **Tableau de bord Contrôleur** :
+  - `messages/controller.php` :
+    1. Cartes d'indicateurs (Total messages, envoyés aux comptes Analyse avec %, envoyés aux comptes Enseignants avec %).
+    2. Diagramme circulaire (Pie Chart) Analyse vs Enseignants.
+    3. Histogramme (Bar Chart) Analyse vs Enseignants.
+    4. Histogramme individuel par compte.
+    5. Tableau détaillé du nombre de messages reçus par compte (qui a reçu combien).
+    6. Journal d'audit complet de tous les messages.
 
 ## Conventions
 

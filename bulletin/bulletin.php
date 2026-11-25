@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/fonctions.php';
 require_once __DIR__ . '/../includes/donnees.php';
+require_once __DIR__ . '/../includes/mail_service.php';
 
 // Création de la table note si elle n'existe pas encore (idempotent)
 try {
@@ -56,6 +57,9 @@ if ($termeRecherche !== '') {
 
     if ($etudiant) {
         $succesRecherche = "Étudiant trouvé : " . $etudiant['nom_prenom'] . " (N° " . $etudiant['numero'] . ", ID " . $etudiant['id'] . ").";
+        $emailEtudiant = recuperer_email_etudiant($etudiant, $pdo);
+        $_SESSION['dernier_etudiant_recherche'] = $termeRecherche;
+        $_SESSION['dernier_etudiant_id'] = (int)$etudiant['id'];
 
         // Récupérer les notes existantes de l'étudiant
         $stmtNotes = $pdo->prepare('
@@ -130,6 +134,8 @@ if ($selectedModuleId > 0) {
         $currentNoteId = $notesParModule[$selectedModuleId]['note_id'];
     }
 }
+
+$emailEtudiant = $etudiant ? recuperer_email_etudiant($etudiant, $pdo) : '';
 
 $messageFlashSucces  = $_GET['succes'] ?? null;
 $messageFlashErreur  = $_GET['erreur'] ?? null;
@@ -271,10 +277,73 @@ require __DIR__ . '/../includes/header.php';
 </form>
 
 <?php if ($etudiant && $notesEtudiant): ?>
-    <div style="margin-top: 36px; padding-top: 20px; border-top: 2px dashed var(--border-medium);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-            <h3 style="margin: 0; color: var(--text-heading);">Relevé de notes de l'étudiant : <?= h($etudiant['nom_prenom']) ?></h3>
-            <button type="button" onclick="window.print()" style="font-size: 13px; padding: 6px 12px;">🖨️ Imprimer le bulletin</button>
+    <div class="bulletin-releve-card" style="margin-top: 36px; padding: 22px; background: #ffffff; border: 1px solid var(--border-medium); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+        
+        <!-- En-tête du Relevé avec Titre, Informations et les 3 Boutons Demandés -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);">
+            <div>
+                <h3 style="margin: 0; color: var(--text-heading); font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                    <span>📜 Relevé Officiel de Notes :</span>
+                    <span style="color: var(--primary); font-weight: 800;"><?= h($etudiant['nom_prenom']) ?></span>
+                </h3>
+                <div style="margin-top: 6px; font-size: 13.5px; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 14px;">
+                    <span>N° Étudiant : <strong><?= h($etudiant['numero']) ?></strong></span>
+                    <span>Filière : <strong class="badge"><?= h($etudiant['filiere']) ?></strong></span>
+                    <span>Email enregistré : <strong style="color: #0369a1;"><?= h($emailEtudiant) ?></strong></span>
+                </div>
+            </div>
+
+            <!-- Barre d'Action avec les 3 Boutons Obligatoires -->
+            <div class="bulletin-actions-toolbar" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                <!-- Bouton 1 : Imprimer le bulletin -->
+                <button type="button" onclick="window.print()" class="btn-bulletin-print" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: #334155; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; font-size: 13.5px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+                    <span>🖨️</span>
+                    <span>Imprimer le bulletin</span>
+                </button>
+
+                <!-- Formulaire Bouton 2 : Envoyer le bulletin par email via mail() -->
+                <form method="post" action="envoyer_bulletin.php" style="margin: 0; display: inline-flex;">
+                    <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                    <input type="hidden" name="numero" value="<?= h($etudiant['numero']) ?>">
+                    <input type="hidden" name="methode" value="mail">
+                    <input type="hidden" name="email_destinataire" value="<?= h($emailEtudiant) ?>">
+                    <button type="submit" class="btn-bulletin-mail" onclick="return confirm('Confirmer l\'envoi du bulletin officiel par email via PHP mail() à <?= h($emailEtudiant) ?> ?');" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: #0284c7; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; font-size: 13.5px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+                        <span>✉️</span>
+                        <span>Envoyer par email (mail())</span>
+                    </button>
+                </form>
+
+                <!-- Formulaire Bouton 3 : Envoyer le bulletin par email via PHPMailer -->
+                <form method="post" action="envoyer_bulletin.php" style="margin: 0; display: inline-flex;">
+                    <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                    <input type="hidden" name="numero" value="<?= h($etudiant['numero']) ?>">
+                    <input type="hidden" name="methode" value="phpmailer">
+                    <input type="hidden" name="email_destinataire" value="<?= h($emailEtudiant) ?>">
+                    <button type="submit" class="btn-bulletin-phpmailer" onclick="return confirm('Confirmer l\'envoi du bulletin officiel par email via PHPMailer (SMTP) à <?= h($emailEtudiant) ?> ?');" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: #4f46e5; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; font-size: 13.5px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">
+                        <span>🚀</span>
+                        <span>Envoyer par email (PHPMailer)</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Mini-panneau d'expédition personnalisée -->
+        <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">📧</span>
+                <span style="font-size: 13.5px; color: var(--text-body);">
+                    Destinataire enregistré :
+                    <strong style="color: #0369a1;"><?= h($emailEtudiant) ?></strong>
+                </span>
+            </div>
+            <form method="post" action="envoyer_bulletin.php" style="margin: 0; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                <input type="hidden" name="numero" value="<?= h($etudiant['numero']) ?>">
+                <label for="custom-dest-email" style="font-size: 12.5px; color: var(--text-muted);">Autre destinataire :</label>
+                <input type="email" id="custom-dest-email" name="email_destinataire" value="<?= h($emailEtudiant) ?>" placeholder="nom@exemple.com" style="width: 210px; padding: 5px 9px; font-size: 12.5px;">
+                <button type="submit" name="methode" value="mail" style="padding: 5px 10px; font-size: 12px; background: #0284c7; color: #fff; border: 0; border-radius: 5px; cursor: pointer;">Via mail()</button>
+                <button type="submit" name="methode" value="phpmailer" style="padding: 5px 10px; font-size: 12px; background: #4f46e5; color: #fff; border: 0; border-radius: 5px; cursor: pointer;">Via PHPMailer</button>
+            </form>
         </div>
 
         <table class="liste" style="width: 100%; margin-top: 10px;">

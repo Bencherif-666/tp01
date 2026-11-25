@@ -48,3 +48,128 @@ function enregistrer_image(array $fichier): array
     }
     return [$nom, null];
 }
+
+// ============================================================================
+// Gestion des Sessions PHP ($_SESSION) & Messages Flash
+// ============================================================================
+
+/**
+ * Assure que la session PHP est démarrée
+ */
+function demarrer_session(): void
+{
+    if (session_status() === PHP_SESSION_NONE && php_sapi_name() !== 'cli') {
+        session_start();
+    }
+}
+
+/**
+ * Définit une valeur dans la session
+ */
+function set_session(string $cle, $valeur): void
+{
+    demarrer_session();
+    $_SESSION[$cle] = $valeur;
+}
+
+/**
+ * Récupère une valeur de session avec valeur par défaut optionnelle
+ */
+function get_session(string $cle, $defaut = null)
+{
+    demarrer_session();
+    return $_SESSION[$cle] ?? $defaut;
+}
+
+/**
+ * Supprime une valeur de la session
+ */
+function unset_session(string $cle): void
+{
+    demarrer_session();
+    unset($_SESSION[$cle]);
+}
+
+/**
+ * Enregistre un message flash de succès en session
+ */
+function set_flash_succes(string $message): void
+{
+    demarrer_session();
+    $_SESSION['flash_succes'][] = $message;
+}
+
+/**
+ * Enregistre un message flash d'erreur en session
+ */
+function set_flash_erreur(string $message): void
+{
+    demarrer_session();
+    $_SESSION['flash_erreur'][] = $message;
+}
+
+/**
+ * Enregistre un message flash d'information en session
+ */
+function set_flash_info(string $message): void
+{
+    demarrer_session();
+    $_SESSION['flash_info'][] = $message;
+}
+
+/**
+ * Récupère et vide les messages flash de la session
+ */
+function get_flash_messages(): array
+{
+    demarrer_session();
+    $messages = [
+        'succes' => $_SESSION['flash_succes'] ?? [],
+        'erreur' => $_SESSION['flash_erreur'] ?? [],
+        'info'   => $_SESSION['flash_info'] ?? [],
+    ];
+    unset($_SESSION['flash_succes'], $_SESSION['flash_erreur'], $_SESSION['flash_info']);
+    return $messages;
+}
+
+/**
+ * Affiche tous les messages flash en attente (session et fallback GET)
+ */
+function afficher_messages_flash(): void
+{
+    demarrer_session();
+    $flashes = get_flash_messages();
+
+    // Fallback rétrocompatible pour les paramètres GET historiques
+    if (!empty($_GET['succes'])) {
+        $flashes['succes'][] = (string)$_GET['succes'];
+    }
+    if (!empty($_GET['erreur'])) {
+        $flashes['erreur'][] = (string)$_GET['erreur'];
+    }
+
+    if (!empty($flashes['succes'])) {
+        foreach ($flashes['succes'] as $s) {
+            echo '<div class="alert alert-success" style="margin: 16px 0; padding: 12px 18px; background: #f0fdf4; border: 1px solid #86efac; color: #166534; border-radius: 8px; font-weight: 500;">';
+            echo '<span>' . $s . '</span>';
+            echo '</div>';
+        }
+    }
+
+    if (!empty($flashes['info'])) {
+        foreach ($flashes['info'] as $inf) {
+            echo '<div class="alert alert-info" style="margin: 16px 0; padding: 12px 18px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; border-radius: 8px; font-weight: 500;">';
+            echo '<span>' . $inf . '</span>';
+            echo '</div>';
+        }
+    }
+
+    if (!empty($flashes['erreur'])) {
+        foreach ($flashes['erreur'] as $e) {
+            echo '<div class="alert alert-error" style="margin: 16px 0; padding: 12px 18px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 8px; font-weight: 500;">';
+            echo '<span>' . $e . '</span>';
+            echo '</div>';
+        }
+    }
+}
+

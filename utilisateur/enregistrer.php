@@ -38,7 +38,8 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (!in_array($role, ['Admin', 'User'], true)) {
+$rolesValides = ['Admin', 'User', 'Analyse', 'Enseignant', 'Controller'];
+if (!in_array($role, $rolesValides, true)) {
     $cible = $idValide ? "utilisateur.php?id={$idValide}&erreur=" : "utilisateur.php?erreur=";
     header('Location: ' . $cible . urlencode("Le rôle sélectionné est invalide."));
     exit;
@@ -70,6 +71,7 @@ if ($idValide === null) {
     ]);
     $newId = $pdo->lastInsertId();
 
+    set_flash_succes("Utilisateur {$email} (ID #{$newId}) créé avec succès.");
     header('Location: utilisateur.php?succes=' . urlencode("Utilisateur {$email} (ID #{$newId}) créé avec succès."));
     exit;
 }
@@ -121,5 +123,6 @@ if ($sessionUser && (int)$sessionUser['id'] === (int)$idValide) {
     $_SESSION['user']['role']  = $role;
 }
 
+set_flash_succes("Utilisateur {$email} (ID #{$idValide}) mis à jour avec succès.");
 header('Location: utilisateur.php?succes=' . urlencode("Utilisateur {$email} (ID #{$idValide}) mis à jour avec succès."));
 exit;

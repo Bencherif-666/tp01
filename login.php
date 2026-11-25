@@ -3,15 +3,15 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/fonctions.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Si l'utilisateur est déjà connecté, redirection selon son rôle
 if (est_connecte()) {
-    if (est_admin()) {
-        header('Location: index.php');
-        exit;
-    } else {
-        header('Location: bulletin_user.php');
-        exit;
-    }
+    $u = utilisateur_connecte();
+    header('Location: ' . page_selon_role($u['role'] ?? ''));
+    exit;
 }
 
 $erreur = null;
@@ -32,13 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($mdp, $user['mdp'])) {
             connecter_utilisateur($user);
-            if ($user['role'] === 'Admin') {
-                header('Location: index.php');
-                exit;
-            } else {
-                header('Location: bulletin_user.php');
-                exit;
-            }
+
+            // On mémorise explicitement le rôle en session
+            $_SESSION['role'] = $user['role'];
+
+            header('Location: ' . page_selon_role($user['role']));
+            exit;
         } else {
             $erreur = "User Inexistant. Inscrivez vous";
         }

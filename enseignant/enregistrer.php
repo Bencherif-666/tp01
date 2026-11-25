@@ -198,6 +198,7 @@ if (!$erreurs) {
                 $messageSucces = "Enseignant ajouté avec succès (ID {$nouvelId}).";
             }
             $succes = true;
+            set_flash_succes($messageSucces);
         }
     } catch (PDOException $e) {
         $erreurs[] = "Erreur de base de données : " . $e->getMessage();

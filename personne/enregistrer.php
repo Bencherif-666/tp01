@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $numero        = trim($_POST['numero'] ?? '');
 $civilite      = $_POST['civilite'] ?? '';
 $nomPrenom     = trim($_POST['nom_prenom'] ?? '');
+$email         = trim($_POST['email'] ?? '');
 $filiere       = trim($_POST['filiere'] ?? '');
 $adresse       = trim($_POST['adresse'] ?? '');
 $codePostal    = trim($_POST['code_postal'] ?? '');
@@ -100,6 +101,7 @@ if (!$erreurs) {
             ':numero'         => $numero,
             ':civilite'       => $civilite,
             ':nom'            => $nomPrenom,
+            ':email'          => $email,
             ':filiere'        => $filiere,
             ':adresse'        => $adresse,
             ':cp'             => $codePostal,
@@ -119,7 +121,7 @@ if (!$erreurs) {
 
         if ($idPersonne !== null && $personneExistante) {
             $sql = 'UPDATE personne
-                    SET numero = :numero, civilite = :civilite, nom_prenom = :nom, filiere = :filiere,
+                    SET numero = :numero, civilite = :civilite, nom_prenom = :nom, email = :email, filiere = :filiere,
                         adresse = :adresse, code_postal = :cp, localite = :localite, pays = :pays,
                         plateformes = :plateformes, applications = :applications,
                         transport = :transport, sport = :sport, activites = :activites,
@@ -133,10 +135,10 @@ if (!$erreurs) {
             $colonnes = $idPersonne === null ? '' : 'id, ';
             $parametreId = $idPersonne === null ? '' : ':id, ';
             $sql = 'INSERT INTO personne
-                    (' . $colonnes . 'numero, civilite, nom_prenom, filiere, adresse, code_postal, localite, pays,
+                    (' . $colonnes . 'numero, civilite, nom_prenom, email, filiere, adresse, code_postal, localite, pays,
                      plateformes, applications, transport, sport, activites, modules, groupe_sanguin, modele_voiture, nationalite_code, photo)
                     VALUES
-                    (' . $parametreId . ':numero, :civilite, :nom, :filiere, :adresse, :cp, :localite, :pays,
+                    (' . $parametreId . ':numero, :civilite, :nom, :email, :filiere, :adresse, :cp, :localite, :pays,
                      :plateformes, :applications, :transport, :sport, :activites, :modules, :groupe_sanguin, :modele_voiture, :nat, :photo)';
             if ($idPersonne !== null) {
                 $valeurs[':id'] = $idPersonne;
@@ -145,6 +147,7 @@ if (!$erreurs) {
             $stmt->execute($valeurs);
         }
         $succes = true;
+        set_flash_succes("La personne " . $nomPrenom . " (N° " . $numero . ") a été enregistrée avec succès.");
     } catch (PDOException $e) {
         $erreurs[] = "Échec de l'enregistrement. Vérifiez l'identifiant et les données puis réessayez.";
     }

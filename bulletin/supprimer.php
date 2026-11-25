@@ -54,6 +54,7 @@ try {
         $succes = true;
         $noteFormattee = number_format((float)$note['note'], 2, ',', ' ');
         $messageSucces = "La note de {$noteFormattee} / 20 pour l'étudiant " . $note['nom_prenom'] . " en " . $note['designation'] . " (" . $note['code_module'] . ") a été supprimée avec succès.";
+        set_flash_succes($messageSucces);
     }
 } catch (PDOException $e) {
     $erreurs[] = "Erreur de base de données : " . $e->getMessage();

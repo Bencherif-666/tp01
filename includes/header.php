@@ -2,6 +2,10 @@
 // includes/header.php
 // Avant l'inclusion, la page doit définir : $base (chemin vers la racine) et $titre
 
+if (session_status() === PHP_SESSION_NONE && php_sapi_name() !== 'cli') {
+    session_start();
+}
+
 $titresEtudiants = [
     'Formulaire Personne', 'Formulaire Étudiant', 'Liste des personnes',
     'Modifier une personne', 'Enregistrement personne', 'Insérer Image',
@@ -53,6 +57,12 @@ $titresUtilisateurs = [
     'Modifier un utilisateur', 'Enregistrement utilisateur', 'Suppression d’un utilisateur'
 ];
 
+$titresMessages = [
+    'Envoyer des messages', 'Send messages', 'Envoyer un message',
+    'Messages reçus', 'Messages Reçus', 'Boîte de réception',
+    'Contrôleur Messages', 'Contrôle des messages', 'Tableau de bord Contrôleur'
+];
+
 $isAccueilActive      = ($titre === 'Accueil');
 $isEtudiantsActive    = in_array($titre, $titresEtudiants, true);
 $isEnseignantsActive  = in_array($titre, $titresEnseignants, true);
@@ -63,9 +73,21 @@ $isStatistiquesActive = in_array($titre, $titresStatistiques, true);
 $isVoyagesActive      = in_array($titre, $titresVoyages, true);
 $isTablesActive       = in_array($titre, $titresTables, true);
 $isUtilisateursActive = in_array($titre, $titresUtilisateurs, true);
+$isSendMessagesActive = in_array($titre, ['Envoyer des messages', 'Send messages', 'Envoyer un message'], true);
+$isRecusActive        = in_array($titre, ['Messages reçus', 'Messages Reçus', 'Boîte de réception'], true);
+$isControllerActive   = in_array($titre, ['Contrôleur Messages', 'Contrôle des messages', 'Tableau de bord Contrôleur'], true);
 
 $userSession = function_exists('utilisateur_connecte') ? utilisateur_connecte() : null;
 $roleSession = $userSession['role'] ?? null;
+
+$nbMsgRecus = 0;
+if ($userSession && in_array($roleSession, ['Analyse', 'Analyste', 'Enseignant', 'Enseignants'], true) && isset($pdo)) {
+    try {
+        $stM = $pdo->prepare('SELECT COUNT(*) FROM message WHERE destinataire_id = :uid');
+        $stM->execute([':uid' => $userSession['id']]);
+        $nbMsgRecus = (int)$stM->fetchColumn();
+    } catch (Throwable $e) {}
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -90,6 +112,36 @@ $roleSession = $userSession['role'] ?? null;
                 </span>
                 <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
             </div>
+        <?php elseif (in_array($roleSession, ['Analyse', 'Analyste'], true)): ?>
+            <a href="<?= $base ?>statistiques/statistiques.php" class="<?= $isStatistiquesActive ? 'active' : '' ?>">Statistiques</a>
+            <a href="<?= $base ?>messages/recus.php" class="<?= $isRecusActive ? 'active' : '' ?>">
+                Messages Reçus<?php if ($nbMsgRecus > 0): ?><span class="badge-count"><?= $nbMsgRecus ?></span><?php endif; ?>
+            </a>
+            <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
+                <span class="user-pill analyse" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
+                    📊 <?= h($userSession['email'] ?? 'Analyste') ?> (Analyse)
+                </span>
+                <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
+            </div>
+        <?php elseif (in_array($roleSession, ['Enseignant', 'Enseignants'], true)): ?>
+            <a href="<?= $base ?>enseignant/enseignant.php" class="<?= $isEnseignantsActive ? 'active' : '' ?>">Enseignants</a>
+            <a href="<?= $base ?>messages/recus.php" class="<?= $isRecusActive ? 'active' : '' ?>">
+                Messages Reçus<?php if ($nbMsgRecus > 0): ?><span class="badge-count"><?= $nbMsgRecus ?></span><?php endif; ?>
+            </a>
+            <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
+                <span class="user-pill enseignant" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
+                    👨‍🏫 <?= h($userSession['email'] ?? 'Enseignant') ?> (Enseignant)
+                </span>
+                <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
+            </div>
+        <?php elseif (in_array($roleSession, ['Controller', 'Controleur', 'Contrôleur'], true)): ?>
+            <a href="<?= $base ?>messages/controller.php" class="<?= $isControllerActive ? 'active' : '' ?>">Contrôleur Messages</a>
+            <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
+                <span class="user-pill controller" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
+                    🛡️ <?= h($userSession['email'] ?? 'Contrôleur') ?> (Controller)
+                </span>
+                <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
+            </div>
         <?php else: ?>
             <a href="<?= $base ?>index.php" class="<?= $isAccueilActive ? 'active' : '' ?>">Accueil</a>
             <a href="<?= $base ?>personne/formulaire.php" class="<?= $isEtudiantsActive ? 'active' : '' ?>">Étudiants</a>
@@ -108,6 +160,7 @@ $roleSession = $userSession['role'] ?? null;
                 </div>
             </div>
             <a href="<?= $base ?>utilisateur/utilisateur.php" class="<?= $isUtilisateursActive ? 'active' : '' ?>">Utilisateurs</a>
+            <a href="<?= $base ?>messages/envoyer.php" class="<?= $isSendMessagesActive ? 'active' : '' ?>">Envoyer des messages</a>
             <?php if ($userSession): ?>
                 <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
                     <span class="user-pill admin" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
@@ -120,3 +173,4 @@ $roleSession = $userSession['role'] ?? null;
     </div>
     <hr>
     <h2><?= h($titre) ?></h2>
+    <?php if (function_exists('afficher_messages_flash')) { afficher_messages_flash(); } ?>

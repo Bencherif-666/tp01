@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/fonctions.php';
+require_once __DIR__ . '/../includes/mail_service.php';
 
 // Crée la colonne `drapeau` si elle n'existe pas encore
 $colonneDrapeau = true;
@@ -96,6 +97,12 @@ if ($numero !== '') {
             }
         }
     }
+}
+
+$emailEtudiant = $etudiant ? recuperer_email_etudiant($etudiant, $pdo) : '';
+if ($etudiant) {
+    demarrer_session();
+    $_SESSION['dernier_bulletin_consulte'] = $etudiant['numero'];
 }
 
 $moyenne = $totalCoefficients > 0 ? $totalPoints / $totalCoefficients : 0;
@@ -378,6 +385,65 @@ require __DIR__ . '/../includes/header.php';
                 <?php else: ?>
                     <em>Aucune photo</em>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Barre d'Action avec les 3 Boutons Demandés : Imprimer, Envoyer mail(), Envoyer PHPMailer -->
+        <div class="bl-actions-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px 24px; margin-bottom: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div>
+                    <h4 style="margin: 0; color: #1e3a8a; font-size: 16px; font-weight: 700;">Actions sur le Bulletin Officiel</h4>
+                    <p style="margin: 4px 0 0; font-size: 13.5px; color: #64748b;">
+                        Email enregistré de l'étudiant : <strong style="color: #0284c7;"><?= h($emailEtudiant) ?></strong>
+                    </p>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                    <!-- Bouton 1 : Imprimer le bulletin -->
+                    <button type="button" onclick="window.print()" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: #334155; color: #fff; border: 0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                        <span>🖨️</span>
+                        <span>Imprimer le bulletin</span>
+                    </button>
+
+                    <!-- Formulaire Bouton 2 : Envoyer le bulletin par email via mail() -->
+                    <form method="post" action="envoyer_bulletin.php" style="margin: 0; display: inline-flex;">
+                        <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                        <input type="hidden" name="numero" value="<?= h($etudiant['numero']) ?>">
+                        <input type="hidden" name="methode" value="mail">
+                        <input type="hidden" name="email_destinataire" value="<?= h($emailEtudiant) ?>">
+                        <button type="submit" onclick="return confirm('Envoyer le bulletin officiel par email via mail() à <?= h($emailEtudiant) ?> ?');" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: #0284c7; color: #fff; border: 0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                            <span>✉️</span>
+                            <span>Envoyer par email (mail())</span>
+                        </button>
+                    </form>
+
+                    <!-- Formulaire Bouton 3 : Envoyer le bulletin par email via PHPMailer -->
+                    <form method="post" action="envoyer_bulletin.php" style="margin: 0; display: inline-flex;">
+                        <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                        <input type="hidden" name="numero" value="<?= h($etudiant['numero']) ?>">
+                        <input type="hidden" name="methode" value="phpmailer">
+                        <input type="hidden" name="email_destinataire" value="<?= h($emailEtudiant) ?>">
+                        <button type="submit" onclick="return confirm('Envoyer le bulletin officiel par email via PHPMailer (SMTP) à <?= h($emailEtudiant) ?> ?');" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: #4f46e5; color: #fff; border: 0; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                            <span>🚀</span>
+                            <span>Envoyer par email (PHPMailer)</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Envoi vers une autre adresse email personnalisée -->
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <span style="font-size: 13px; color: #475569;">
+                    ℹ️ L'email sera expédié à l'adresse enregistrée de l'étudiant avec son relevé complet de notes formaté.
+                </span>
+                <form method="post" action="envoyer_bulletin.php" style="margin: 0; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                    <input type="hidden" name="numero" value="<?= h($etudiant['numero']) ?>">
+                    <label for="autre-email" style="font-size: 12.5px; color: #64748b;">Autre destinataire :</label>
+                    <input type="email" id="autre-email" name="email_destinataire" value="<?= h($emailEtudiant) ?>" placeholder="etudiant@domaine.com" style="width: 220px; padding: 5px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <button type="submit" name="methode" value="mail" style="padding: 6px 12px; font-size: 12.5px; background: #0284c7; color: #fff; border: 0; border-radius: 6px; cursor: pointer;">Via mail()</button>
+                    <button type="submit" name="methode" value="phpmailer" style="padding: 6px 12px; font-size: 12.5px; background: #4f46e5; color: #fff; border: 0; border-radius: 6px; cursor: pointer;">Via PHPMailer</button>
+                </form>
             </div>
         </div>
 

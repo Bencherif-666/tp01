@@ -98,6 +98,9 @@ require __DIR__ . '/../includes/header.php';
                     <select name="role" id="role" required style="width: 200px;">
                         <option value="User" <?= (($userEdite['role'] ?? 'User') === 'User') ? 'selected' : '' ?>>User</option>
                         <option value="Admin" <?= (($userEdite['role'] ?? '') === 'Admin') ? 'selected' : '' ?>>Admin</option>
+                        <option value="Analyse" <?= (($userEdite['role'] ?? '') === 'Analyse') ? 'selected' : '' ?>>Analyse</option>
+                        <option value="Enseignant" <?= (($userEdite['role'] ?? '') === 'Enseignant') ? 'selected' : '' ?>>Enseignant</option>
+                        <option value="Controller" <?= (($userEdite['role'] ?? '') === 'Controller') ? 'selected' : '' ?>>Controller</option>
                     </select>
                 </td>
             </tr>
@@ -160,8 +163,19 @@ require __DIR__ . '/../includes/header.php';
                             <?php endif; ?>
                         </td>
                         <td>
-                            <span class="user-pill <?= $u['role'] === 'Admin' ? 'admin' : 'user' ?>" style="font-size: 11.5px; padding: 3px 10px;">
-                                <?= $u['role'] === 'Admin' ? '👑 Admin' : '👤 User' ?>
+                            <?php
+                            $roleClass = strtolower((string)$u['role']);
+                            $roleIcons = [
+                                'Admin' => '👑',
+                                'User' => '👤',
+                                'Analyse' => '📊',
+                                'Enseignant' => '👨‍🏫',
+                                'Controller' => '🛡️'
+                            ];
+                            $icon = $roleIcons[$u['role']] ?? '👤';
+                            ?>
+                            <span class="user-pill <?= h($roleClass) ?>" style="font-size: 11.5px; padding: 3px 10px;">
+                                <?= $icon . ' ' . h($u['role']) ?>
                             </span>
                         </td>
                         <td>

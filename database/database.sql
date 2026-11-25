@@ -106,7 +106,8 @@ ALTER TABLE personne
   ADD COLUMN IF NOT EXISTS modules VARCHAR(100) NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS groupe_sanguin VARCHAR(10) NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS modele_voiture VARCHAR(50) NOT NULL DEFAULT '',
-  ADD COLUMN IF NOT EXISTS filiere VARCHAR(30) NOT NULL DEFAULT '';
+  ADD COLUMN IF NOT EXISTS filiere VARCHAR(30) NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS email VARCHAR(100) DEFAULT NULL;
 
 -- Table des filières
 CREATE TABLE IF NOT EXISTS filiere (
@@ -443,10 +444,12 @@ CREATE TABLE IF NOT EXISTS `user` (
   `id` INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `mdp` VARCHAR(255) NOT NULL,
-  `role` VARCHAR(255) NOT NULL DEFAULT 'User'
+  `role` VARCHAR(50) NOT NULL DEFAULT 'User'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Comptes de test par défaut (Admin / User)
+ALTER TABLE `user` MODIFY COLUMN `role` VARCHAR(50) NOT NULL DEFAULT 'User';
+
+-- Comptes de test par défaut
 INSERT INTO `user` (`email`, `mdp`, `role`)
 SELECT 'admin@example.com', '$2y$10$BWZdfL9i87HntjU/NFXZ6.l0csgzfq7MjhpJGrrbSiiKxKAIvevX2', 'Admin'
 WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `email` = 'admin@example.com');
@@ -454,4 +457,50 @@ WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `email` = 'admin@example.com');
 INSERT INTO `user` (`email`, `mdp`, `role`)
 SELECT 'user@example.com', '$2y$10$CG1YQ/vunfQFLtgZ.1J86eOrfJ85J0jwIVGDKa5e6iBy8s2nH4pdi', 'User'
 WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `email` = 'user@example.com');
+
+INSERT INTO `user` (`email`, `mdp`, `role`)
+SELECT 'analyse@example.com', '$2y$10$Grdkd6VygqenRtm3APoXf.LLImRm8u4TwBFqbEjEL6bOsJLM0o3Na', 'Analyse'
+WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `email` = 'analyse@example.com');
+
+INSERT INTO `user` (`email`, `mdp`, `role`)
+SELECT 'enseignant@example.com', '$2y$10$dMxmlUHvUOd9yPcYDHlz8OfpTaZR2mk5VTfGsn.trJFYyk3RJ7Lm.', 'Enseignant'
+WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `email` = 'enseignant@example.com');
+
+INSERT INTO `user` (`email`, `mdp`, `role`)
+SELECT 'controller@example.com', '$2y$10$ORjTrFCPXwmWaEk/h5DQ4.bB/r4pOyXJ5kscHI.dBpra2R4hhJi7m', 'Controller'
+WHERE NOT EXISTS (SELECT 1 FROM `user` WHERE `email` = 'controller@example.com');
+
+-- ============================================================
+-- Table des messages (Admin -> Enseignants / Analyse & Contrôle)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `message` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `expediteur_id` INT NOT NULL,
+  `destinataire_id` INT NOT NULL,
+  `destinataire_role` VARCHAR(50) NOT NULL DEFAULT '',
+  `contenu` TEXT NOT NULL,
+  `date_envoi` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_message_expediteur FOREIGN KEY (`expediteur_id`) REFERENCES `user`(`id`) ON DELETE CASCADE,
+  CONSTRAINT fk_message_destinataire FOREIGN KEY (`destinataire_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Messages de démonstration
+INSERT INTO `message` (`expediteur_id`, `destinataire_id`, `destinataire_role`, `contenu`, `date_envoi`)
+SELECT uAdmin.id, uDest.id, uDest.role, 'Bonjour, merci de préparer le rapport statistique des admis pour le semestre 1.', '2026-11-19 08:30:00'
+FROM `user` uAdmin, `user` uDest
+WHERE uAdmin.email = 'admin@example.com' AND uDest.email = 'analyse@example.com'
+  AND NOT EXISTS (SELECT 1 FROM `message` WHERE `contenu` LIKE 'Bonjour, merci de préparer%');
+
+INSERT INTO `message` (`expediteur_id`, `destinataire_id`, `destinataire_role`, `contenu`, `date_envoi`)
+SELECT uAdmin.id, uDest.id, uDest.role, 'Rappel : n\'oubliez pas d\'intégrer les graphiques par filière.', '2026-11-19 08:45:00'
+FROM `user` uAdmin, `user` uDest
+WHERE uAdmin.email = 'admin@example.com' AND uDest.email = 'analyse@example.com'
+  AND NOT EXISTS (SELECT 1 FROM `message` WHERE `contenu` LIKE 'Rappel : n\'oubliez pas%');
+
+INSERT INTO `message` (`expediteur_id`, `destinataire_id`, `destinataire_role`, `contenu`, `date_envoi`)
+SELECT uAdmin.id, uDest.id, uDest.role, 'Bonjour cher enseignant, veuillez vérifier les notes saisies pour le module BDD.', '2026-11-19 08:35:00'
+FROM `user` uAdmin, `user` uDest
+WHERE uAdmin.email = 'admin@example.com' AND uDest.email = 'enseignant@example.com'
+  AND NOT EXISTS (SELECT 1 FROM `message` WHERE `contenu` LIKE 'Bonjour cher enseignant%');
+
 

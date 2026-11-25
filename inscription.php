@@ -5,13 +5,9 @@ require_once __DIR__ . '/includes/fonctions.php';
 
 // Si l'utilisateur est déjà connecté, redirection selon son rôle
 if (est_connecte()) {
-    if (est_admin()) {
-        header('Location: index.php');
-        exit;
-    } else {
-        header('Location: bulletin_user.php');
-        exit;
-    }
+    $u = utilisateur_connecte();
+    header('Location: ' . page_selon_role($u['role'] ?? ''));
+    exit;
 }
 
 $erreur = null;
@@ -24,7 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $role  = trim((string)($_POST['role'] ?? 'User'));
 
     $emailSaisi = $email;
-    $roleSaisi  = in_array($role, ['Admin', 'User'], true) ? $role : 'User';
+    $rolesValides = ['Admin', 'User', 'Analyse', 'Enseignant', 'Controller'];
+    $roleSaisi  = in_array($role, $rolesValides, true) ? $role : 'User';
 
     if ($email === '') {
         $erreur = "Veuillez renseigner une adresse email.";
@@ -32,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreur = "Format d'adresse email invalide.";
     } elseif ($mdp === '') {
         $erreur = "Le mot de passe ne peut pas être vide.";
-    } elseif (!in_array($role, ['Admin', 'User'], true)) {
+    } elseif (!in_array($role, $rolesValides, true)) {
         $erreur = "Rôle invalide.";
     } else {
         // Vérifier l'unicité de l'adresse email
@@ -227,6 +224,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <select name="role" id="role" required>
                     <option value="User" <?= $roleSaisi === 'User' ? 'selected' : '' ?>>User</option>
                     <option value="Admin" <?= $roleSaisi === 'Admin' ? 'selected' : '' ?>>Admin</option>
+                    <option value="Analyse" <?= $roleSaisi === 'Analyse' ? 'selected' : '' ?>>Analyse</option>
+                    <option value="Enseignant" <?= $roleSaisi === 'Enseignant' ? 'selected' : '' ?>>Enseignant</option>
+                    <option value="Controller" <?= $roleSaisi === 'Controller' ? 'selected' : '' ?>>Controller</option>
                 </select>
             </div>
 

@@ -1,0 +1,11 @@
+{
+    "id": "20261125_200937_94b5111b",
+    "date": "2026-11-25T20:09:37+00:00",
+    "destinataire": "nazim@gmail.com",
+    "etudiant": "[Bulletin Officiel] Relevé de notes — Hamer El ain Nazim (N° 1)",
+    "sujet": "[Bulletin Officiel] Relevé de notes — Hamer El ain Nazim (N° 1)",
+    "methode": "mail()",
+    "succes": false,
+    "erreur": "La fonction mail() n'a pas pu remettre le message (serveur MTA local non configuré ou inactif).",
+    "fichier_html": "20261125_200937_94b5111b.html"
+}
