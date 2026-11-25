@@ -66,6 +66,7 @@ $isUtilisateursActive = in_array($titre, $titresUtilisateurs, true);
 
 $userSession = function_exists('utilisateur_connecte') ? utilisateur_connecte() : null;
 $roleSession = $userSession['role'] ?? null;
+$usernameSession = $userSession['username'] ?? $userSession['email'] ?? 'Utilisateur';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -76,7 +77,7 @@ $roleSession = $userSession['role'] ?? null;
     <link rel="stylesheet" href="<?= $base ?>css/style.css">
 </head>
 <body>
-<div id="page">
+<div id="page" class="<?= $titre === 'Bulletin de notes' ? 'page-bulletin' : '' ?>">
     <div class="header-brand">
         <h1>TP01 – PAW</h1>
         <span class="brand-badge">ISIL &bull; Université Djillali Liabes</span>
@@ -86,7 +87,7 @@ $roleSession = $userSession['role'] ?? null;
             <a href="<?= $base ?>bulletin_user.php" class="active">Bulletin de Notes</a>
             <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
                 <span class="user-pill user" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
-                    👤 <?= h($userSession['email'] ?? 'Utilisateur') ?> (User)
+                    👤 Bienvenue, <?= h($usernameSession) ?> ! (User)
                 </span>
                 <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
             </div>
@@ -98,7 +99,7 @@ $roleSession = $userSession['role'] ?? null;
             </a>
             <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
                 <span class="user-pill user" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
-                    📊 <?= h($userSession['email'] ?? 'Analyst') ?> (Analyst)
+                    📊 Bienvenue, <?= h($usernameSession) ?> ! (Analyst)
                 </span>
                 <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
             </div>
@@ -111,7 +112,7 @@ $roleSession = $userSession['role'] ?? null;
             </a>
             <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
                 <span class="user-pill user" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
-                    🎓 <?= h($userSession['email'] ?? 'Enseignant') ?> (Enseignant)
+                    🎓 Bienvenue, <?= h($usernameSession) ?> ! (Enseignant)
                 </span>
                 <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
             </div>
@@ -119,7 +120,7 @@ $roleSession = $userSession['role'] ?? null;
             <a href="<?= $base ?>communication/controller.php" class="<?= $titre === 'Tableau de bord Controller' ? 'active' : '' ?>">Communications</a>
             <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
                 <span class="user-pill user" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
-                    📨 <?= h($userSession['email'] ?? 'Controller') ?> (Controller)
+                    📨 Bienvenue, <?= h($usernameSession) ?> ! (Controller)
                 </span>
                 <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
             </div>
@@ -145,7 +146,7 @@ $roleSession = $userSession['role'] ?? null;
             <?php if ($userSession): ?>
                 <div style="margin-left: auto; display: inline-flex; align-items: center; gap: 8px;">
                     <span class="user-pill admin" title="Connecté en tant que <?= h($userSession['email'] ?? '') ?>">
-                        👑 <?= h($userSession['email'] ?? 'Admin') ?> (Admin)
+                        👑 Bienvenue, <?= h($usernameSession) ?> ! (Admin)
                     </span>
                     <a href="<?= $base ?>logout.php" class="btn-logout" title="Se déconnecter">Déconnexion</a>
                 </div>

@@ -123,6 +123,7 @@ if ($mdp !== '') {
 $sessionUser = utilisateur_connecte();
 if ($sessionUser && (int)$sessionUser['id'] === (int)$idValide) {
     $_SESSION['user']['email'] = $email;
+    $_SESSION['user']['username'] = $email;
     $_SESSION['user']['role']  = $role;
 }
 

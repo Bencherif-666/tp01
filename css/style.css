@@ -1223,6 +1223,80 @@ footer {
   transform: translateY(-1px) !important;
 }
 
+/* Actions de formulaire */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  color: var(--text-heading);
+  background: var(--bg-alt);
+  border-color: var(--border-medium);
+}
+
+.btn-danger {
+  color: #fff;
+  background: var(--error-solid);
+  border-color: var(--error-solid);
+}
+
+.bulletin-document {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.bulletin-document-header {
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--primary);
+}
+
+.bulletin-document-header h3 {
+  margin: 0;
+  color: var(--text-heading);
+}
+
+.bulletin-document-header p {
+  margin: 4px 0 12px;
+  color: var(--text-muted);
+}
+
+.bulletin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.bulletin-actions form {
+  margin: 0;
+}
+
 /* Print Styles */
 @media print {
   body {
@@ -1242,14 +1316,30 @@ footer {
   #menu,
   .header-brand,
   .form-recherche,
+  .bl-search,
+  .no-print,
   button,
   .btn-link,
   form[action="supprimer.php"],
   #btn-toggle-etudiant,
   #pied,
   footer,
-  hr {
+  hr,
+  #page > h2 {
     display: none !important;
+  }
+
+  .bl-page {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .bulletin-document,
+  .bl-card,
+  .bl-table-wrap {
+    box-shadow: none !important;
+    break-inside: avoid;
   }
 
   #fiche-etudiant-print,
@@ -1259,5 +1349,14 @@ footer {
     box-shadow: none !important;
     border: 1px solid #333 !important;
     page-break-inside: avoid;
+  }
+
+  .page-bulletin > *:not(#fiche-bulletin-print) {
+    display: none !important;
+  }
+
+  #fiche-bulletin-print table.liste th:last-child,
+  #fiche-bulletin-print table.liste td:last-child {
+    display: none !important;
   }
 }

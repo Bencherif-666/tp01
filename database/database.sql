@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS personne (
   numero           VARCHAR(10)  NOT NULL,
   civilite         VARCHAR(15)  NOT NULL,
   nom_prenom       VARCHAR(80)  NOT NULL,
+  email            VARCHAR(255) DEFAULT NULL,
   adresse          VARCHAR(150) NOT NULL,
   code_postal      VARCHAR(10)  NOT NULL,
   localite         VARCHAR(60)  NOT NULL,
@@ -100,6 +101,7 @@ CREATE TABLE IF NOT EXISTS personne (
 
 -- Mise à niveau des bases déjà créées
 ALTER TABLE personne
+  ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS transport VARCHAR(20) NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS sport VARCHAR(40) NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS activites VARCHAR(100) NOT NULL DEFAULT '',

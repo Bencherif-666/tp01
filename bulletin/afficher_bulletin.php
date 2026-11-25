@@ -384,6 +384,11 @@ require __DIR__ . '/../includes/header.php';
         <?php if (!$notes): ?>
             <p class="bl-error">Aucune note n'est enregistrée pour cet étudiant.</p>
         <?php else: ?>
+            <section id="fiche-bulletin-print" class="bulletin-document">
+                <header class="bulletin-document-header">
+                    <h3>Bulletin de notes</h3>
+                    <p><?= h($etudiant['civilite'] ?: '') ?> <?= h($etudiant['nom_prenom']) ?> — <?= h($etudiant['filiere']) ?></p>
+                </header>
             <div class="bl-table-wrap">
                 <table class="bl-table">
                     <thead>
@@ -459,6 +464,7 @@ require __DIR__ . '/../includes/header.php';
                     </tfoot>
                 </table>
             </div>
+            </section>
         <?php endif; ?>
     <?php endif; ?>
 

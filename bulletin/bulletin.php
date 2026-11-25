@@ -4,6 +4,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/fonctions.php';
 require_once __DIR__ . '/../includes/donnees.php';
 
+exiger_admin('../');
+
 // Création de la table note si elle n'existe pas encore (idempotent)
 try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS note (
@@ -133,6 +135,9 @@ if ($selectedModuleId > 0) {
 
 $messageFlashSucces  = $_GET['succes'] ?? null;
 $messageFlashErreur  = $_GET['erreur'] ?? null;
+$flashMail = $_SESSION['flash_mail'] ?? null;
+unset($_SESSION['flash_mail']);
+$csrfMailToken = $_SESSION['csrf_mail'] ??= bin2hex(random_bytes(32));
 
 $base  = '../';
 $titre = 'Bulletin de notes';
@@ -155,6 +160,10 @@ require __DIR__ . '/../includes/header.php';
 
 <?php if ($messageFlashErreur): ?>
     <p class="erreur"><?= h($messageFlashErreur) ?></p>
+<?php endif; ?>
+
+<?php if ($flashMail): ?>
+    <p class="<?= ($flashMail['type'] ?? '') === 'success' ? 'ok' : 'erreur' ?>"><?= h($flashMail['message'] ?? '') ?></p>
 <?php endif; ?>
 
 <?php if ($erreurRecherche): ?>
@@ -271,10 +280,28 @@ require __DIR__ . '/../includes/header.php';
 </form>
 
 <?php if ($etudiant && $notesEtudiant): ?>
-    <div style="margin-top: 36px; padding-top: 20px; border-top: 2px dashed var(--border-medium);">
+    <div id="fiche-bulletin-print" class="bulletin-document" style="margin-top: 36px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
             <h3 style="margin: 0; color: var(--text-heading);">Relevé de notes de l'étudiant : <?= h($etudiant['nom_prenom']) ?></h3>
-            <button type="button" onclick="window.print()" style="font-size: 13px; padding: 6px 12px;">🖨️ Imprimer le bulletin</button>
+            <div class="bulletin-actions no-print">
+                <button type="button" class="btn-secondary" onclick="window.print()">Imprimer</button>
+                <?php if (est_admin()): ?>
+                    <?php if (filter_var(trim((string)($etudiant['email'] ?? '')), FILTER_VALIDATE_EMAIL)): ?>
+                        <form method="post" action="send_mail_native.php">
+                            <input type="hidden" name="csrf_token" value="<?= h($csrfMailToken) ?>">
+                            <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                            <button type="submit" class="btn-primary">Envoyer Mail (sans PHPMailer)</button>
+                        </form>
+                        <form method="post" action="send_mail_phpmailer.php">
+                            <input type="hidden" name="csrf_token" value="<?= h($csrfMailToken) ?>">
+                            <input type="hidden" name="etudiant_id" value="<?= h($etudiant['id']) ?>">
+                            <button type="submit" class="btn-primary">Envoyer Mail (avec PHPMailer)</button>
+                        </form>
+                    <?php else: ?>
+                        <span class="erreur">Aucune adresse e-mail valide n'est renseignée pour cet étudiant.</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
 
         <table class="liste" style="width: 100%; margin-top: 10px;">
@@ -286,7 +313,7 @@ require __DIR__ . '/../includes/header.php';
                     <th>Note / 20</th>
                     <th>Note pondérée</th>
                     <th>Date saisie</th>
-                    <th>Actions</th>
+                    <th class="no-print">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -304,7 +331,7 @@ require __DIR__ . '/../includes/header.php';
                         <td><strong><?= h($ne['designation']) ?></strong></td>
                         <td><?= h($ne['code_module']) ?></td>
                         <td><?= h($ne['coefficient']) ?></td>
-                        <td>
+                        <td class="no-print">
                             <strong style="color: <?= $noteVal >= 10 ? '#15803d' : '#b91c1c' ?>;">
                                 <?= number_format($noteVal, 2, ',', ' ') ?> / 20
                             </strong>

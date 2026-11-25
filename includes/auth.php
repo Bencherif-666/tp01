@@ -84,9 +84,10 @@ function connecter_utilisateur(array $user): void
         session_regenerate_id(true);
     }
     $_SESSION['user'] = [
-        'id'    => (int)$user['id'],
-        'email' => (string)$user['email'],
-        'role'  => (string)$user['role'],
+        'id'       => (int)$user['id'],
+        'username' => (string)$user['email'],
+        'email'    => (string)$user['email'],
+        'role'     => (string)$user['role'],
     ];
 }
 
@@ -104,11 +105,14 @@ function deconnecter_utilisateur(): void
         setcookie(
             session_name(),
             '',
-            time() - 42000,
-            $params['path'],
-            $params['domain'],
-            $params['secure'],
-            $params['httponly']
+            [
+                'expires' => time() - 42000,
+                'path' => $params['path'],
+                'domain' => $params['domain'],
+                'secure' => $params['secure'],
+                'httponly' => $params['httponly'],
+                'samesite' => $params['samesite'] ?? 'Lax',
+            ]
         );
     }
     session_destroy();

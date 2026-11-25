@@ -2,6 +2,8 @@
 // config/database.php
 // Connexion unique à MySQL (PDO). Toutes les autres pages font require_once de ce fichier.
 // Si besoin, modifiez UNIQUEMENT ces 4 valeurs.
+require_once __DIR__ . '/../includes/auth.php';
+
 $host   = 'localhost';
 $dbname = 'tp01_paw';
 $user   = 'root';   // XAMPP : root

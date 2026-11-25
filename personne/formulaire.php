@@ -113,6 +113,10 @@ require __DIR__ . '/../includes/header.php';
             <td><input type="text" name="nom_prenom" id="nom_prenom" size="40" maxlength="80" placeholder="Benali Farid" value="<?= h($personne['nom_prenom'] ?? '') ?>"></td>
         </tr>
         <tr>
+            <td>Adresse e-mail :</td>
+            <td><input type="email" name="email" id="email" maxlength="255" value="<?= h($personne['email'] ?? '') ?>" placeholder="etudiant@exemple.com"></td>
+        </tr>
+        <tr>
             <td>Filière :</td>
             <td>
                 <select name="filiere" id="filiere">

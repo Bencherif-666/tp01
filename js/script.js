@@ -74,6 +74,10 @@ function validerPersonne(form) {
     var erreurs = [];
     if (!/^[0-9]{1,10}$/.test(form.numero.value.trim())) erreurs.push('Numéro invalide (chiffres uniquement).');
     if (form.nom_prenom.value.trim() === '') erreurs.push('Le nom / prénom est obligatoire.');
+    if (form.email && form.email.value.trim() !== '' &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.value.trim())) {
+        erreurs.push("Adresse e-mail invalide.");
+    }
     if (form.adresse.value.trim() === '') erreurs.push("L'adresse est obligatoire.");
     if (!/^[0-9]{4,10}$/.test(form.code_postal.value.trim())) erreurs.push('Code postal invalide.');
     if (form.localite.value.trim() === '') erreurs.push('La localité est obligatoire.');
